@@ -1,7 +1,18 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
-      <el-form-item label="従業員名" prop="employeeName">
+    <el-form
+      :model="queryParams"
+      ref="queryForm"
+      size="small"
+      :inline="true"
+      v-show="showSearch"
+      label-width="100px"
+    >
+      <el-form-item
+        label="従業員名"
+        prop="employeeName"
+        style="margin-right: 16px"
+      >
         <el-input
           v-model="queryParams.employeeName"
           placeholder="请输入従業員名"
@@ -9,8 +20,16 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="ステータス" prop="employeeWorkStatus">
-        <el-select v-model="queryParams.employeeWorkStatus" placeholder="请选择ステータス" clearable>
+      <el-form-item
+        label="ステータス"
+        prop="employeeWorkStatus"
+        style="margin-right: 16px"
+      >
+        <el-select
+          v-model="queryParams.employeeWorkStatus"
+          placeholder="请选择ステータス"
+          clearable
+        >
           <el-option
             v-for="dict in dict.type.employee_status"
             :key="dict.value"
@@ -19,8 +38,17 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="日本語レベル" prop="employeeJapaneseLevel">
-        <el-select v-model="queryParams.employeeJapaneseLevel" placeholder="请选择日本語レベル" clearable>
+      <el-form-item
+        label="日本語レベル"
+        prop="employeeJapaneseLevels"
+        style="margin-right: 16px"
+      >
+        <el-select
+          v-model="queryParams.employeeJapaneseLevels"
+          placeholder="请选择日本語レベル"
+          clearable
+          multiple
+        >
           <el-option
             v-for="dict in dict.type.japanese_level"
             :key="dict.value"
@@ -29,7 +57,11 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="案件名" prop="employeeEvent">
+      <el-form-item
+        label="案件名"
+        prop="employeeEvent"
+        style="margin-right: 16px"
+      >
         <el-input
           v-model="queryParams.employeeEvent"
           placeholder="请输入案件名"
@@ -37,9 +69,31 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+      <el-form-item label="技術" style="margin-right: 16px">
+        <el-select
+          v-model="queryParams.technologyIds"
+          multiple
+          placeholder="技術を選択してください"
+        >
+          <el-option
+            v-for="tech in technologyList"
+            :key="tech.technologyId"
+            :label="tech.technologyName"
+            :value="tech.technologyId"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item style="margin-left: 16px">
+        <el-button
+          type="primary"
+          icon="el-icon-search"
+          size="mini"
+          @click="handleQuery"
+          >検索</el-button
+        >
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
+          >重置</el-button
+        >
       </el-form-item>
     </el-form>
 
@@ -52,7 +106,8 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['employee:employee:add']"
-        >新增</el-button>
+          >新增</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -63,7 +118,8 @@
           :disabled="single"
           @click="handleUpdate"
           v-hasPermi="['employee:employee:edit']"
-        >修改</el-button>
+          >修改</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -74,7 +130,8 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['employee:employee:remove']"
-        >删除</el-button>
+          >删除</el-button
+        >
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -84,40 +141,86 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['employee:employee:export']"
-        >导出</el-button>
+          >导出</el-button
+        >
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar
+        :showSearch.sync="showSearch"
+        @queryTable="getList"
+      ></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="employeeList" @selection-change="handleSelectionChange">
+    <el-table
+      v-loading="loading"
+      :data="employeeList"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="従業員ID" align="center" prop="employeeId" />
       <el-table-column label="従業員名" align="center" prop="employeeName" />
       <el-table-column label="性別" align="center" prop="employeeGender">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.sys_user_sex" :value="scope.row.employeeGender"/>
+          <dict-tag
+            :options="dict.type.sys_user_sex"
+            :value="scope.row.employeeGender"
+          />
         </template>
       </el-table-column>
-      <el-table-column label="ステータス" align="center" prop="employeeWorkStatus">
+      <el-table-column
+        label="ステータス"
+        align="center"
+        prop="employeeWorkStatus"
+      >
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.employee_status" :value="scope.row.employeeWorkStatus"/>
+          <dict-tag
+            :options="dict.type.employee_status"
+            :value="scope.row.employeeWorkStatus"
+          />
         </template>
       </el-table-column>
       <el-table-column label="年齢" align="center" prop="employeeAge" />
-      <el-table-column label="日本語レベル" align="center" prop="employeeJapaneseLevel">
+      <el-table-column
+        label="日本語レベル"
+        align="center"
+        prop="employeeJapaneseLevel"
+      >
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.japanese_level" :value="scope.row.employeeJapaneseLevel"/>
+          <dict-tag
+            :options="dict.type.japanese_level"
+            :value="scope.row.employeeJapaneseLevel"
+          />
         </template>
       </el-table-column>
-      <el-table-column label="社員メール" align="center" prop="employeeMail" />
-      <el-table-column label="社員誕生日" align="center" prop="employeeBirthday" width="180">
+      <el-table-column
+        label="社員メール"
+        align="center"
+        prop="employeeMail"
+        width="220"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        label="社員誕生日"
+        align="center"
+        prop="employeeBirthday"
+        width="180"
+      >
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.employeeBirthday, '{y}-{m}-{d}') }}</span>
+          <span>{{
+            parseTime(scope.row.employeeBirthday, "{y}-{m}-{d}")
+          }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="職務経験" align="center" prop="employeeWorkExperience" />
+      <el-table-column
+        label="職務経験"
+        align="center"
+        prop="employeeWorkExperience"
+      />
       <el-table-column label="案件名" align="center" prop="employeeEvent" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column
+        label="アクション"
+        align="center"
+        class-name="small-padding fixed-width"
+      >
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -125,20 +228,22 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['employee:employee:edit']"
-          >修改</el-button>
+            >詳細</el-button
+          >
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['employee:employee:remove']"
-          >删除</el-button>
+            >削除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -162,7 +267,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="ステータス" prop="employeeWorkStatus">
-          <el-select v-model="form.employeeWorkStatus" placeholder="请选择ステータス">
+          <el-select
+            v-model="form.employeeWorkStatus"
+            placeholder="请选择ステータス"
+          >
             <el-option
               v-for="dict in dict.type.employee_status"
               :key="dict.value"
@@ -175,7 +283,10 @@
           <el-input v-model="form.employeeAge" placeholder="请输入年齢" />
         </el-form-item>
         <el-form-item label="日本語レベル" prop="employeeJapaneseLevel">
-          <el-select v-model="form.employeeJapaneseLevel" placeholder="请选择日本語レベル">
+          <el-select
+            v-model="form.employeeJapaneseLevel"
+            placeholder="请选择日本語レベル"
+          >
             <el-option
               v-for="dict in dict.type.japanese_level"
               :key="dict.value"
@@ -185,18 +296,26 @@
           </el-select>
         </el-form-item>
         <el-form-item label="社員メール" prop="employeeMail">
-          <el-input v-model="form.employeeMail" placeholder="请输入社員メール" />
+          <el-input
+            v-model="form.employeeMail"
+            placeholder="请输入社員メール"
+          />
         </el-form-item>
         <el-form-item label="社員誕生日" prop="employeeBirthday">
-          <el-date-picker clearable
+          <el-date-picker
+            clearable
             v-model="form.employeeBirthday"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择社員誕生日">
+            placeholder="请选择社員誕生日"
+          >
           </el-date-picker>
         </el-form-item>
         <el-form-item label="職務経験" prop="employeeWorkExperience">
-          <el-input v-model="form.employeeWorkExperience" placeholder="请输入職務経験" />
+          <el-input
+            v-model="form.employeeWorkExperience"
+            placeholder="请输入職務経験"
+          />
         </el-form-item>
         <el-form-item label="案件名" prop="employeeEvent">
           <el-input v-model="form.employeeEvent" placeholder="请输入案件名" />
@@ -211,11 +330,20 @@
 </template>
 
 <script>
-import { listEmployee, getEmployee, delEmployee, addEmployee, updateEmployee } from "@/api/employee/employee"
-
+import {
+  listEmployee,
+  getEmployee,
+  delEmployee,
+  addEmployee,
+  updateEmployee,
+} from "@/api/employee/employee";
+import { getAllTechnology } from "@/api/technology/technology";
 export default {
   name: "Employee",
-  dicts: ['employee_status', 'japanese_level', 'sys_user_sex'],
+  dicts: ["employee_status", "japanese_level", "sys_user_sex"],
+  activated() {
+    this.getList();
+  },
   data() {
     return {
       // 遮罩层
@@ -232,6 +360,8 @@ export default {
       total: 0,
       // 社員情報管理表格数据
       employeeList: [],
+      // 社員管理情報リスト
+      technologyList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -242,42 +372,84 @@ export default {
         pageSize: 10,
         employeeName: null,
         employeeWorkStatus: null,
-        employeeJapaneseLevel: null,
-        employeeEvent: null
+        employeeJapaneseLevels: [],
+        employeeEvent: null,
+        technologyIds: [],
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
         employeeName: [
-          { required: true, message: "従業員名不能为空", trigger: "blur" }
+          { required: true, message: "従業員名不能为空", trigger: "blur" },
         ],
         employeeGender: [
-          { required: true, message: "性別不能为空", trigger: "change" }
+          { required: true, message: "性別不能为空", trigger: "change" },
         ],
         employeeWorkStatus: [
-          { required: true, message: "ステータス不能为空", trigger: "change" }
+          { required: true, message: "ステータス不能为空", trigger: "change" },
         ],
-      }
-    }
+        employeeWorkExperience: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback();
+              } else if (!/^\d+$/.test(value)) {
+                callback(new Error("職務経験は数字で入力してください"));
+              } else {
+                callback();
+              }
+            },
+            trigger: "blur",
+          },
+        ],
+        employeeAge: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback();
+              } else if (!/^\d+$/.test(value)) {
+                callback(new Error("年齢は数字で入力してください"));
+              } else {
+                const age = parseInt(value, 10);
+                if (age < 18 || age > 65) {
+                  callback(
+                    new Error("年齢は18歳から65歳までで入力してください")
+                  );
+                } else {
+                  callback();
+                }
+              }
+            },
+            trigger: "blur",
+          },
+        ],
+      },
+    };
   },
   created() {
-    this.getList()
+    this.getList();
+    this.getTechnologyList();
   },
   methods: {
     /** 查询社員情報管理列表 */
     getList() {
-      this.loading = true
-      listEmployee(this.queryParams).then(response => {
-        this.employeeList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+      this.loading = true;
+      listEmployee(this.queryParams).then((response) => {
+        this.employeeList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    getTechnologyList() {
+      getAllTechnology().then((response) => {
+        this.technologyList = response.rows;
+      });
     },
     // 取消按钮
     cancel() {
-      this.open = false
-      this.reset()
+      this.open = false;
+      this.reset();
     },
     // 表单重置
     reset() {
@@ -291,78 +463,86 @@ export default {
         employeeMail: null,
         employeeBirthday: null,
         employeeWorkExperience: null,
-        employeeEvent: null
-      }
-      this.resetForm("form")
+        employeeEvent: null,
+      };
+      this.resetForm("form");
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1
-      this.getList()
+      this.queryParams.pageNum = 1;
+      this.getList();
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.resetForm("queryForm");
+      this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.employeeId)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map((item) => item.employeeId);
+      this.single = selection.length !== 1;
+      this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加社員情報管理"
+      this.reset();
+      this.open = true;
+      this.title = "添加社員情報管理";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.reset()
-      const employeeId = row.employeeId || this.ids
-      getEmployee(employeeId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改社員情報管理"
-      })
+      const employeeId = row.employeeId || this.ids;
+      this.$router.push({
+        name: "EmployeeDetail",
+        params: { employeeId },
+      });
     },
     /** 提交按钮 */
     submitForm() {
-      this.$refs["form"].validate(valid => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.form.employeeId != null) {
-            updateEmployee(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
+            updateEmployee(this.form).then((response) => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
           } else {
-            addEmployee(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
+            addEmployee(this.form).then((response) => {
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
           }
         }
-      })
+      });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const employeeIds = row.employeeId || this.ids
-      this.$modal.confirm('是否确认删除社員情報管理编号为"' + employeeIds + '"的数据项？').then(function() {
-        return delEmployee(employeeIds)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+      const employeeIds = row.employeeId || this.ids;
+      this.$modal
+        .confirm(
+          '是否确认删除社員情報管理编号为"' + employeeIds + '"的数据项？'
+        )
+        .then(function () {
+          return delEmployee(employeeIds);
+        })
+        .then(() => {
+          this.getList();
+          this.$modal.msgSuccess("删除成功");
+        })
+        .catch(() => {});
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('employee/employee/export', {
-        ...this.queryParams
-      }, `employee_${new Date().getTime()}.xlsx`)
-    }
-  }
-}
+      this.download(
+        "employee/employee/export",
+        {
+          ...this.queryParams,
+        },
+        `employee_${new Date().getTime()}.xlsx`
+      );
+    },
+  },
+};
 </script>

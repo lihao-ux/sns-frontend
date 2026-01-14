@@ -93,6 +93,49 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
+    path: '/system/employee-detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['system:employee:query'],
+    children: [
+      {
+        path: 'index/:employeeId(\\d+)',
+        component: () => import('@/views/employee/employee/detail'),
+        name: 'EmployeeDetail',
+        meta: {
+          title: '社員詳細',
+          activeMenu: '/system/employee'
+        }
+      }
+    ]
+  },
+  {
+    path: '/case/case-detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['case:case:query'],
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/case/case/detail'),
+        name: 'CaseAdd',
+        meta: {
+          title: '案件新規',
+          activeMenu: '/case/case'
+        }
+      },
+      {
+        path: 'index/:caseId(\\d+)',
+        component: () => import('@/views/case/case/detail'),
+        name: 'CaseDetail',
+        meta: {
+          title: '案件詳細',
+          activeMenu: '/case/case'
+        }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,

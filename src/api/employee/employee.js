@@ -42,3 +42,21 @@ export function delEmployee(employeeId) {
     method: 'delete'
   })
 }
+
+// 删除社員技能
+export function delEmployeeSkill(employeeTechnologyId) {
+  return request({
+    url: '/employee/employee/skill/' + employeeTechnologyId,
+    method: 'delete'
+  })
+}
+
+// 待機社員情報検索
+export function getFreeEmployeeList(queryParams) {
+  return request({
+    url: '/employee/employee/getFreeEmployeeList',
+    method: 'get',
+    params: queryParams
+  })
+}
+
