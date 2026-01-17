@@ -43,6 +43,17 @@ export function delEmployee(employeeId) {
   })
 }
 
+// 删除社員情報管理
+export function getCaseHistory(employeeId) {
+  return request({
+    url: '/employee/employee/getCaseHistory',
+    method: 'get',
+    params: {
+      employeeId: employeeId
+    }
+  })
+}
+
 // 删除社員技能
 export function delEmployeeSkill(employeeTechnologyId) {
   return request({

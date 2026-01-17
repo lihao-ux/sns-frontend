@@ -96,7 +96,7 @@ export const dynamicRoutes = [
     path: '/system/employee-detail',
     component: Layout,
     hidden: true,
-    permissions: ['system:employee:query'],
+    permissions: ['employee:employee:query'],
     children: [
       {
         path: 'index/:employeeId(\\d+)',

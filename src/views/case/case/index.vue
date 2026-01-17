@@ -71,19 +71,7 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['case:case:add']"
-          >新增</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['case:case:edit']"
-          >修改</el-button
+          >案件登録</el-button
         >
       </el-col>
       <el-col :span="1.5">
@@ -95,7 +83,7 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['case:case:remove']"
-          >删除</el-button
+          >案件削除</el-button
         >
       </el-col>
       <el-col :span="1.5">
@@ -106,7 +94,7 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['case:case:export']"
-          >导出</el-button
+          >案件印刷</el-button
         >
       </el-col>
       <right-toolbar
@@ -173,17 +161,9 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
+            @click="goDetail(scope.row)"
             v-hasPermi="['case:case:edit']"
-            >修改</el-button
-          >
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['case:case:remove']"
-            >删除</el-button
+            >詳細</el-button
           >
         </template>
       </el-table-column>
@@ -275,8 +255,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">確　定</el-button>
+        <el-button @click="cancel">キャンセル</el-button>
       </div>
     </el-dialog>
   </div>
@@ -295,6 +275,9 @@ import {
 export default {
   name: "Case",
   dicts: ["case_work_style"],
+  activated() {
+    this.getList();
+  },
   data() {
     return {
       queryParams: {
@@ -419,13 +402,12 @@ export default {
       this.$router.push("/case/case-detail/index");
     },
     /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const caseId = row.caseId || this.ids;
-      getCase(caseId).then((response) => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改案件情報";
+    goDetail(row) {
+      this.$router.push({
+        name: "CaseDetail",
+        params: {
+          caseId: row.caseId,
+        },
       });
     },
     /** 提交按钮 */

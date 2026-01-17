@@ -15,110 +15,131 @@
         class="case-form"
       >
         <el-row :gutter="20">
-          <!-- お客様 -->
-          <el-col :span="8">
-            <el-form-item label="お客様" prop="customerId">
-              <el-select
-                v-model="form.customerId"
-                filterable
-                remote
-                clearable
-                placeholder="お客様名を入力してください"
-                :remote-method="queryCustomer"
-                :loading="customerLoading"
-              >
-                <el-option
-                  v-for="item in customerOptions"
-                  :key="item.customerId"
-                  :label="item.customerName"
-                  :value="item.customerId"
-                />
-              </el-select>
-            </el-form-item>
+          <!-- 左侧：其他字段 -->
+          <el-col :span="12">
+            <el-row :gutter="20">
+              <!-- お客様 -->
+              <el-col :span="24">
+                <el-form-item label="お客様" prop="customerId">
+                  <el-select
+                    v-model="form.customerId"
+                    filterable
+                    remote
+                    clearable
+                    placeholder="お客様名を入力してください"
+                    :remote-method="queryCustomer"
+                    :loading="customerLoading"
+                  >
+                    <el-option
+                      v-for="item in customerOptions"
+                      :key="item.customerId"
+                      :label="item.customerName"
+                      :value="item.customerId"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+
+              <!-- 案件名 -->
+              <el-col :span="24">
+                <el-form-item label="案件名" prop="caseName">
+                  <el-input
+                    v-model="form.caseName"
+                    placeholder="案件名を入力"
+                    maxlength="50"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <!-- 現場地 -->
+              <el-col :span="24">
+                <el-form-item label="現場地" prop="siteLocation">
+                  <el-input
+                    v-model="form.siteLocation"
+                    placeholder="現場地を入力"
+                    maxlength="100"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <!-- 案件開始日 -->
+              <el-col :span="24">
+                <el-form-item label="案件開始日" prop="caseStartTime">
+                  <el-date-picker
+                    v-model="form.caseStartTime"
+                    type="date"
+                    value-format="yyyy-MM-dd"
+                    placeholder="日付を選択"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <!-- 案件終了日 -->
+              <el-col :span="24">
+                <el-form-item label="案件終了日" prop="caseEndTime">
+                  <el-date-picker
+                    v-model="form.caseEndTime"
+                    type="date"
+                    value-format="yyyy-MM-dd"
+                    placeholder="日付を選択"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <!-- 自社人数 -->
+              <el-col :span="24">
+                <el-form-item label="自社人数" prop="companyStaffCount">
+                  <el-input
+                    :value="form.employeeList ? form.employeeList.length : 0"
+                    readonly
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <!-- 勤務形態 -->
+              <el-col :span="24">
+                <el-form-item label="勤務形態" prop="caseWorkStyle">
+                  <el-select
+                    v-model="form.caseWorkStyle"
+                    placeholder="選択してください"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="dict in dict.type.case_work_style"
+                      :key="dict.value"
+                      :label="dict.label"
+                      :value="dict.value"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+
+              <!-- 最寄り駅 -->
+              <el-col :span="24">
+                <el-form-item label="最寄り駅" prop="caseStation">
+                  <el-input
+                    v-model="form.caseStation"
+                    placeholder="駅名を入力"
+                    maxlength="20"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-col>
 
-          <!-- 案件名 -->
-          <el-col :span="8">
-            <el-form-item label="案件名" prop="caseName">
-              <el-input v-model="form.caseName" placeholder="案件名を入力" />
-            </el-form-item>
-          </el-col>
-
-          <!-- 現場地 -->
-          <el-col :span="8">
-            <el-form-item label="現場地" prop="siteLocation">
-              <el-input
-                v-model="form.siteLocation"
-                placeholder="現場地を入力"
-              />
-            </el-form-item>
-          </el-col>
-
-          <!-- 案件開始日 -->
-          <el-col :span="8">
-            <el-form-item label="案件開始日" prop="caseStartTime">
-              <el-date-picker
-                v-model="form.caseStartTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="日付を選択"
-              />
-            </el-form-item>
-          </el-col>
-
-          <!-- 案件終了日 -->
-          <el-col :span="8">
-            <el-form-item label="案件終了日" prop="caseEndTime">
-              <el-date-picker
-                v-model="form.caseEndTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="日付を選択"
-              />
-            </el-form-item>
-          </el-col>
-
-          <!-- 自社人数 -->
-          <el-col :span="8">
-            <el-form-item label="自社人数" prop="companyStaffCount">
-              <el-input-number
-                v-model="form.companyStaffCount"
-                :min="0"
-                controls-position="right"
-              />
-            </el-form-item>
-          </el-col>
-
-          <!-- 勤務形態 -->
-          <el-col :span="8">
-            <el-form-item label="勤務形態" prop="caseWorkStyle">
-              <el-select
-                v-model="form.caseWorkStyle"
-                placeholder="選択してください"
-              >
-                <el-option
-                  v-for="dict in dict.type.case_work_style"
-                  :key="dict.value"
-                  :label="dict.label"
-                  :value="dict.value"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-
-          <!-- 最寄り駅 -->
-          <el-col :span="8">
-            <el-form-item label="最寄り駅" prop="caseStation">
-              <el-input v-model="form.caseStation" placeholder="駅名を入力" />
-            </el-form-item>
-          </el-col>
-
-          <!-- 案件概要 -->
-          <el-col :span="24">
-            <el-form-item label="案件概要" prop="caseSummary">
+          <!-- 右侧：案件概要 -->
+          <el-col :span="12">
+            <el-form-item
+              label="案件概要"
+              prop="caseSummary"
+              label-width="80px"
+            >
               <el-input
                 type="textarea"
-                :rows="4"
+                :rows="20"
                 v-model="form.caseSummary"
                 placeholder="案件概要を入力"
               />
@@ -156,27 +177,24 @@
       >
         <el-table-column type="index" label="No." width="60" align="center" />
 
-        <el-table-column label="社員ID" min-width="80">
+        <el-table-column label="社員ID" min-width="100" align="center">
           <template slot-scope="scope">
-            <span>
-              {{ scope.row.employeeId || "-" }}
-            </span>
+            <span>{{ scope.row.employeeId || "-" }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="社員名" min-width="80">
+        <el-table-column label="社員名" min-width="150" align="center">
           <template slot-scope="scope">
-            <span>
-              {{ scope.row.employeeName || "-" }}
-            </span>
+            <span>{{ scope.row.employeeName || "-" }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="案件内役割" min-width="80">
+        <el-table-column label="案件内役割" min-width="120" align="center">
           <template slot-scope="scope">
             <el-select
               v-model="scope.row.role"
               placeholder="選択してください"
+              :disabled="scope.row.id != null"
               style="width: 100%"
             >
               <el-option
@@ -188,21 +206,32 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="参画開始日" min-width="80">
+
+        <el-table-column label="参画開始日" min-width="150" align="center">
           <template slot-scope="scope">
-            <span>
-              {{ scope.row.joinDate || "-" }}
-            </span>
+            <el-date-picker
+              v-model="scope.row.joinDate"
+              type="date"
+              placeholder="日付を選択"
+              :disabled="scope.row.id != null"
+              style="width: 100%"
+            />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+
+        <el-table-column
+          label="アクション"
+          width="200"
+          align="center"
+          fixed="right"
+        >
           <template slot-scope="scope">
             <el-button
               type="text"
               size="small"
-              icon="el-icon-delete"
+              icon="el-icon-back"
               class="delete-btn"
-              @click="handleDeleteSkill(scope.$index)"
+              @click="handleExit(scope.$index)"
             >
               退場
             </el-button>
@@ -211,7 +240,7 @@
               size="small"
               icon="el-icon-delete"
               class="delete-btn"
-              @click="handleDeleteSkill(scope.$index)"
+              @click="handleDeleteEmployee(scope.$index)"
             >
               削除
             </el-button>
@@ -312,6 +341,60 @@
             </el-button>
           </el-form-item>
         </el-form>
+        <div
+          style="
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
+          <span style="margin-right: 4px; font-weight: bold">※技術能力：</span>
+          <div style="display: flex; align-items: center; gap: 4px">
+            <span
+              style="
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-color: gold;
+              "
+            ></span>
+            <span>得意</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px">
+            <span
+              style="
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-color: red;
+              "
+            ></span>
+            <span>独立作業可</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px">
+            <span
+              style="
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-color: blue;
+              "
+            ></span>
+            <span>経験有</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px">
+            <span
+              style="
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                background-color: gray;
+              "
+            ></span>
+            <span>知識有</span>
+          </div>
+        </div>
         <el-table
           v-loading="loading"
           :data="employeeFreeList"
@@ -322,14 +405,20 @@
             label="従業員ID"
             align="center"
             prop="employeeId"
-            width="120"
+            width="100"
           />
           <el-table-column
             label="従業員名"
             align="center"
             prop="employeeName"
+            width="150"
           />
-          <el-table-column label="性別" align="center" prop="employeeGender">
+          <el-table-column
+            label="性別"
+            align="center"
+            prop="employeeGender"
+            width="90"
+          >
             <template slot-scope="scope">
               <dict-tag
                 :options="dict.type.sys_user_sex"
@@ -341,6 +430,7 @@
             label="ステータス"
             align="center"
             prop="employeeWorkStatus"
+            width="100"
           >
             <template slot-scope="scope">
               <dict-tag
@@ -349,11 +439,17 @@
               />
             </template>
           </el-table-column>
-          <el-table-column label="年齢" align="center" prop="employeeAge" />
+          <el-table-column
+            label="年齢"
+            align="center"
+            prop="employeeAge"
+            width="60"
+          />
           <el-table-column
             label="日本語レベル"
             align="center"
             prop="employeeJapaneseLevel"
+            width="100"
           >
             <template slot-scope="scope">
               <dict-tag
@@ -366,7 +462,48 @@
             label="職務経験"
             align="center"
             prop="employeeWorkExperience"
+            width="80"
           />
+          <el-table-column label="技術能力" align="center" width="600">
+            <template #default="scope">
+              <span
+                v-if="
+                  scope.row.employeeSkills &&
+                  scope.row.employeeSkills.length > 0
+                "
+              >
+                <span
+                  v-for="(skill, index) in scope.row.employeeSkills"
+                  :key="skill.employeeTechnologyId"
+                  :style="{
+                    color: getProficiencyColor(skill.proficiencyLevel),
+                  }"
+                >
+                  {{ getSkillLabel(skill) }}
+                  <span v-if="index < scope.row.employeeSkills.length - 1"
+                    >,
+                  </span>
+                </span>
+              </span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="アクション"
+            align="center"
+            width="100"
+            fixed="right"
+          >
+            <template #default="scope">
+              <el-button
+                type="primary"
+                size="mini"
+                @click="handleEnter(scope.row)"
+              >
+                入場
+              </el-button>
+            </template>
+          </el-table-column>
         </el-table>
         <pagination
           v-show="total > 0"
@@ -379,13 +516,61 @@
           <el-button @click="dialogVisible = false"> 閉じる </el-button>
         </span>
       </el-dialog>
+      <el-dialog
+        title="退場情報入力"
+        :visible.sync="leaveDialogVisible"
+        width="420px"
+        append-to-body
+      >
+        <el-form :model="exitParams" label-width="100px">
+          <el-form-item label="社員名">
+            <el-input v-model="exitParams.employeeName" disabled />
+          </el-form-item>
+
+          <el-form-item label="入場日時">
+            <el-date-picker
+              v-model="exitParams.joinDate"
+              type="date"
+              style="width: 100%"
+              disabled
+            />
+          </el-form-item>
+
+          <el-form-item label="退場日時" required>
+            <el-date-picker
+              v-model="exitParams.exitDate"
+              type="date"
+              value-format="yyyy-MM-dd"
+              placeholder="退場日時を選択してください"
+              style="width: 100%"
+            />
+          </el-form-item>
+
+          <el-form-item label="役割">
+            <el-input :value="getRoleLabel(exitParams.role)" disabled />
+          </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="leaveDialogVisible = false">
+            キャンセル
+          </el-button>
+          <el-button type="primary" @click="confirmLeave"> 確定 </el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
 import { getAllTechnology } from "@/api/technology/technology";
-import { getCase, addCase, updateCase } from "@/api/case/case";
+import {
+  getCase,
+  addCase,
+  updateCase,
+  delCaseEmployee,
+  exitCaseEmployee,
+} from "@/api/case/case";
 import { getCustomersByName } from "@/api/customer/customer";
 import { getFreeEmployeeList } from "@/api/employee/employee";
 export default {
@@ -399,6 +584,7 @@ export default {
   ],
   data() {
     return {
+      leaveDialogVisible: false,
       technologyList: [],
       queryParams: {
         pageNum: 1,
@@ -406,6 +592,15 @@ export default {
         technologyIds: [],
         employeeJapaneseLevels: [],
         employeeWorkExperience: null,
+      },
+      exitParams: {
+        id: null,
+        employeeName: "",
+        caseId: null,
+        employeeId: null,
+        role: "",
+        joinDate: null,
+        exitDate: null,
       },
       loading: false,
       total: 0,
@@ -431,6 +626,13 @@ export default {
             trigger: "blur",
           },
         ],
+        caseSummary: [
+          {
+            required: true,
+            message: "案件概要を入力してください",
+            trigger: "blur",
+          },
+        ],
         companyStaffCount: [
           {
             type: "number",
@@ -445,21 +647,123 @@ export default {
     const caseId = this.$route.params.caseId;
     if (caseId) {
       this.isEditMode = true;
-      this.loadCase(caseId);
+      this.loadCase();
     } else {
       this.initForm();
     }
     this.getTechnologyList();
   },
   methods: {
+    getRoleLabel(value) {
+      if (!value) {
+        return "";
+      }
+      const item = this.dict.type.case_role.find((d) => d.value === value);
+      return item ? item.label : value;
+    },
+    confirmLeave() {
+      if (this.exitParams.exitDate == null) {
+        this.$message({
+          message: "社員退場日時を入力してください",
+          type: "warning",
+        });
+      } else {
+        exitCaseEmployee(this.exitParams).then((response) => {
+          this.leaveDialogVisible = false;
+          this.loadCase();
+          this.$message.success("社員の退場処理が正常に完了しました");
+        });
+      }
+    },
+    //社員退場
+    handleExit(index) {
+      if (
+        this.form.employeeList[index] &&
+        this.form.employeeList[index].id != null
+      ) {
+        this.exitParams = {
+          id: this.form.employeeList[index].id,
+          employeeName: this.form.employeeList[index].employeeName,
+          caseId: this.$route.params.caseId,
+          employeeId: this.form.employeeList[index].employeeId,
+          role: this.form.employeeList[index].role,
+          joinDate: this.form.employeeList[index].joinDate,
+          exitDate: null,
+        };
+        this.leaveDialogVisible = true;
+      } else {
+        this.$message({
+          message: "この社員はまだ入場していません",
+          type: "warning",
+        });
+      }
+    },
+    //社員削除
+    handleDeleteEmployee(index) {
+      if (
+        this.form.employeeList[index] &&
+        this.form.employeeList[index].id != null
+      ) {
+        this.$confirm(
+          "本削除操作は誤操作防止のための処理です。削除後は当該社員の案件履歴は保持されず、出勤状態は「現場出勤」から「待機中」へ変更されます。こちらのデータを削除してもよろしいでしょうか？",
+          "確認",
+          {
+            confirmButtonText: "確定",
+            cancelButtonText: "キャンセル",
+            type: "warning",
+          }
+        )
+          .then(() => {
+            delCaseEmployee({
+              id: this.form.employeeList[index].id,
+              employeeId: this.form.employeeList[index].employeeId,
+            }).then((response) => {
+              const caseId = this.$route.params.caseId;
+              this.loadCase();
+              this.$message.success("削除しました");
+            });
+          })
+          .catch(() => {});
+      } else {
+        this.form.employeeList.splice(index, 1);
+      }
+    },
+    handleEnter(employee) {
+      console.log(employee);
+      this.form.employeeList.push({
+        id: null,
+        caseId: this.isEditMode ? this.$route.params.caseId : null,
+        employeeId: employee.employeeId,
+        employeeName: employee.employeeName,
+      });
+      this.dialogVisible = false;
+    },
+    // 获取技能显示文字：技能名 + 经验年数
+    getSkillLabel(skill) {
+      const tech = this.technologyList.find(
+        (t) => t.technologyId === skill.technologyId
+      );
+      return tech.technologyName;
+    },
+
+    // 根据熟练度返回颜色
+    getProficiencyColor(level) {
+      const map = {
+        3: "gold",
+        2: "red",
+        1: "blue",
+        0: "gray",
+      };
+      return map[level];
+    },
     resetQuery() {
-      this.queryParams = {
+      (this.queryParams = {
         pageNum: 1,
         pageSize: 10,
         technologyIds: [],
         employeeJapaneseLevels: [],
         employeeWorkExperience: null,
-      },
+      }),
         this.handleQuery();
     },
     /** 搜索按钮操作 */
@@ -497,14 +801,9 @@ export default {
       this.queryParams.pageSize = 10;
       this.getFreeList();
       this.dialogVisible = true;
-      // this.form.employeeList.push({
-      //   employeeTechnologyId: null,
-      //   technologyId: null,
-      //   proficiencyLevel: null,
-      //   experienceYears: 0,
-      // });
     },
-    loadCase(id) {
+    loadCase() {
+      const id = this.$route.params.caseId;
       this.loading = true;
       getCase(id).then((res) => {
         this.form = res.data;
@@ -519,9 +818,11 @@ export default {
         this.customerLoading = false;
       });
     },
+    //案件登録
     handleCreate() {
       this.$refs.form.validate((valid) => {
         if (!valid) return;
+        if (!this.validEmployee()) return;
         this.submitLoading = true;
         addCase(this.form).then(() => {
           this.submitLoading = false;
@@ -530,13 +831,35 @@ export default {
         });
       });
     },
+    validEmployee() {
+      for (let i = 0; i < this.form.employeeList.length; i++) {
+        const row = this.form.employeeList[i];
+        if (!row.role) {
+          this.$message({
+            message: `社員 ${i + 1} の案件内役割を選択してください`,
+            type: "warning",
+          });
+          return false;
+        }
+        if (!row.joinDate) {
+          this.$message({
+            message: `社員 ${i + 1} の参画開始日を選択してください`,
+            type: "warning",
+          });
+          return false;
+        }
+      }
+      return true; // 全部通过
+    },
     handleUpdate() {
       this.$refs.form.validate((valid) => {
         if (!valid) return;
+        if (!this.validEmployee()) return;
         this.submitLoading = true;
         updateCase(this.form).then(() => {
           this.submitLoading = false;
           this.$modal.msgSuccess("更新しました");
+          this.loadCase();
         });
       });
     },
@@ -650,7 +973,7 @@ export default {
   color: #409eff;
 }
 .fixed-height-dialog ::v-deep .el-dialog {
-  height: 810px;
+  height: 840px;
 }
 .fixed-height-dialog ::v-deep .el-dialog {
   position: relative;

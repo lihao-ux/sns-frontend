@@ -111,18 +111,6 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['employee:employee:edit']"
-          >修改</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="danger"
           plain
           icon="el-icon-delete"
@@ -491,7 +479,7 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      const employeeId = row.employeeId || this.ids;
+      const employeeId = row.employeeId;
       this.$router.push({
         name: "EmployeeDetail",
         params: { employeeId },

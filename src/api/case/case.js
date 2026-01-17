@@ -43,3 +43,20 @@ export function delCase(caseId) {
   })
 }
 
+// 案件内社員削除
+export function delCaseEmployee(params) {
+  return request({
+    url: '/case/case/delCaseEmployee',
+    method: 'delete',
+    params: params
+  });
+}
+
+// 案件内社員退場
+export function exitCaseEmployee(params) {
+  return request({
+    url: '/case/case/exitCaseEmployee',
+    method: 'delete',
+    params: params
+  });
+}

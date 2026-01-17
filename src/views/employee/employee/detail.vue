@@ -122,6 +122,47 @@
         </el-row>
       </el-form>
     </el-card>
+    <!-- 社員案件履歴（閲覧のみ） -->
+    <el-card v-if="employeeId" class="info-card" shadow="hover">
+      <div slot="header" class="card-header">
+        <i class="el-icon-document"></i>
+        <span>社員案件履歴</span>
+      </div>
+
+      <el-collapse v-model="activeHistoryNames">
+        <el-collapse-item title="案件履歴一覧" name="1">
+          <!-- 有履歴：才渲染表格 -->
+          <el-table :data="caseHistoryList" border style="width: 100%">
+            <!-- 自定义空状态（关键） -->
+            <template #empty>
+              <span>案件履歴が登録されていません</span>
+            </template>
+
+            <el-table-column
+              type="index"
+              label="No."
+              width="60"
+              align="center"
+            />
+
+            <el-table-column prop="caseName" label="案件名" min-width="200" />
+
+            <el-table-column label="役割" min-width="120">
+              <template slot-scope="scope">
+                <dict-tag
+                  :options="dict.type.case_role"
+                  :value="scope.row.role"
+                />
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="joinDate" label="開始日" min-width="120" />
+
+            <el-table-column prop="exitDate" label="終了日" min-width="120" />
+          </el-table>
+        </el-collapse-item>
+      </el-collapse>
+    </el-card>
 
     <!-- 技能情報管理 -->
     <el-card
@@ -130,7 +171,7 @@
       shadow="hover"
     >
       <div slot="header" class="card-header">
-        <i class="el-icon-notebook-2"></i>
+        <i class="el-icon-setting"></i>
         <span>技能情報管理</span>
         <el-button
           type="primary"
@@ -245,17 +286,27 @@ import {
   updateEmployee,
   addEmployee,
   delEmployeeSkill,
+  getCaseHistory,
 } from "@/api/employee/employee";
 import { getAllTechnology } from "@/api/technology/technology";
 export default {
   name: "EmployeeDetail",
-  dicts: ["sys_user_sex", "employee_status", "japanese_level", "skill_level"],
+  dicts: [
+    "sys_user_sex",
+    "employee_status",
+    "japanese_level",
+    "skill_level",
+    "case_role",
+  ],
   data() {
     return {
+      activeHistoryNames:["0"],
+      employeeId: null,
       loading: false,
       submitLoading: false,
       form: {},
       technologyList: [],
+      caseHistoryList: [],
       rules: {
         employeeName: [
           { required: true, message: "従業員名不能为空", trigger: "blur" },
@@ -307,11 +358,13 @@ export default {
   created() {
     this.getTechnologyList();
     const id = this.$route.params.employeeId;
+    this.employeeId = this.$route.params.employeeId;
     // 判断是编辑模式还是新增模式
     if (id) {
       this.isEditMode = true;
       // 编辑模式：加载员工数据
       this.getEmployeeById();
+      this.getCaseHistoryList();
     } else {
       // 新增模式：初始化空表单
       this.isEditMode = false;
@@ -329,6 +382,15 @@ export default {
     }
   },
   methods: {
+    async getCaseHistoryList() {
+      try {
+        const employeeId = this.$route.params.employeeId;
+        const { data } = await getCaseHistory(employeeId);
+        this.caseHistoryList = data;
+      } catch (e) {
+        this.$message.error("案件履歴の取得に失敗しました");
+      }
+    },
     getEmployeeById() {
       this.loading = true;
       const id = this.$route.params.employeeId;
@@ -367,6 +429,7 @@ export default {
       this.$tab.closePage();
     },
     getTechnologyList() {
+      console.log(6666);
       getAllTechnology().then((response) => {
         this.technologyList = response.rows;
       });
@@ -697,5 +760,11 @@ export default {
   height: 40px;
   font-size: 15px;
   font-weight: 500;
+}
+.case-history-empty {
+  padding: 24px 0;
+  text-align: center;
+  color: #909399;
+  font-size: 14px;
 }
 </style>
