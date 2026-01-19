@@ -93,12 +93,23 @@
             </el-form-item>
           </el-col>
 
+          <!-- メール -->
+          <el-col :span="8">
+            <el-form-item label="メールアドレス" prop="employeeMail">
+              <el-input
+                v-model="form.employeeMail"
+                placeholder="メールアドレスを入力"
+              />
+            </el-form-item>
+          </el-col>
+
           <!-- 在職ステータス -->
           <el-col :span="8">
             <el-form-item label="在職ステータス" prop="employeeWorkStatus">
               <el-select
                 v-model="form.employeeWorkStatus"
                 placeholder="選択してください"
+                disabled
               >
                 <el-option
                   v-for="dict in dict.type.employee_status"
@@ -109,14 +120,18 @@
               </el-select>
             </el-form-item>
           </el-col>
-
-          <!-- メール -->
           <el-col :span="8">
-            <el-form-item label="メールアドレス" prop="employeeMail">
-              <el-input
-                v-model="form.employeeMail"
-                placeholder="メールアドレスを入力"
-              />
+            <el-form-item label="案件名">
+              <el-link
+                v-if="form.caseName"
+                type="primary"
+                :underline="false"
+                @click="toCaseDetail(form)"
+              >
+                {{ form.caseName }}
+              </el-link>
+
+              <span v-else class="case-name-text empty-text"> 現場なし </span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -300,7 +315,7 @@ export default {
   ],
   data() {
     return {
-      activeHistoryNames:["0"],
+      activeHistoryNames: ["0"],
       employeeId: null,
       loading: false,
       submitLoading: false,
@@ -432,6 +447,14 @@ export default {
       console.log(6666);
       getAllTechnology().then((response) => {
         this.technologyList = response.rows;
+      });
+    },
+    toCaseDetail(row) {
+      this.$router.push({
+        name: "CaseDetail",
+        params: {
+          caseId: row.caseId,
+        },
       });
     },
     // 添加技能
@@ -766,5 +789,15 @@ export default {
   text-align: center;
   color: #909399;
   font-size: 14px;
+}
+.case-name-text {
+  display: inline-block;
+  height: 32px;
+  line-height: 32px;
+  color: #606266; /* Element UI 默认深灰 */
+}
+
+.empty-text {
+  color: #909399; /* 比 placeholder 深一点的灰 */
 }
 </style>

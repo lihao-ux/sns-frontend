@@ -57,13 +57,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item
-        label="案件名"
-        prop="employeeEvent"
-        style="margin-right: 16px"
-      >
+      <el-form-item label="案件名" prop="caseName" style="margin-right: 16px">
         <el-input
-          v-model="queryParams.employeeEvent"
+          v-model="queryParams.caseName"
           placeholder="请输入案件名"
           clearable
           @keyup.enter.native="handleQuery"
@@ -203,7 +199,19 @@
         align="center"
         prop="employeeWorkExperience"
       />
-      <el-table-column label="案件名" align="center" prop="employeeEvent" />
+      <el-table-column label="案件名" align="center" prop="caseName">
+        <template #default="scope">
+          <el-link
+            v-if="scope.row.caseName"
+            type="primary"
+            :underline="false"
+            @click="toCaseDetail(scope.row)"
+          >
+            {{ scope.row.caseName }}
+          </el-link>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column
         label="アクション"
         align="center"
@@ -361,7 +369,7 @@ export default {
         employeeName: null,
         employeeWorkStatus: null,
         employeeJapaneseLevels: [],
-        employeeEvent: null,
+        caseNmae: null,
         technologyIds: [],
       },
       // 表单参数
@@ -451,7 +459,8 @@ export default {
         employeeMail: null,
         employeeBirthday: null,
         employeeWorkExperience: null,
-        employeeEvent: null,
+        caseId: null,
+        caseName: null,
       };
       this.resetForm("form");
     },
@@ -476,6 +485,14 @@ export default {
       this.reset();
       this.open = true;
       this.title = "添加社員情報管理";
+    },
+    toCaseDetail(row) {
+      this.$router.push({
+        name: "CaseDetail",
+        params: {
+          caseId: row.caseId,
+        },
+      });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
