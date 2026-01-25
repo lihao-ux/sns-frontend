@@ -128,7 +128,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="従業員ID" align="center" prop="employeeId" />
+      <el-table-column label="従業員ID" align="center" prop="staffId" />
       <el-table-column label="従業員名" align="center" prop="employeeName" />
       <el-table-column label="性別" align="center" prop="employeeGender">
         <template slot-scope="scope">
