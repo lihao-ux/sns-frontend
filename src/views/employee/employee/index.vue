@@ -107,18 +107,6 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['employee:employee:remove']"
-          >删除</el-button
-        >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="warning"
           plain
           icon="el-icon-download"
@@ -246,14 +234,26 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改社員情報管理对话框 -->
+    <!-- 新規社員ダイアログ -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="従業員名" prop="employeeName">
-          <el-input v-model="form.employeeName" placeholder="请输入従業員名" />
+        <el-form-item label="社員ID" prop="staffId">
+          <el-input
+            v-model="form.staffId"
+            placeholder="社員IDは、社員ログイン用のアカウントです。"
+          />
+        </el-form-item>
+        <el-form-item label="社員名" prop="employeeName">
+          <el-input
+            v-model="form.employeeName"
+            placeholder="社員名を入力してください"
+          />
         </el-form-item>
         <el-form-item label="性別" prop="employeeGender">
-          <el-select v-model="form.employeeGender" placeholder="请选择性別">
+          <el-select
+            v-model="form.employeeGender"
+            placeholder="性別を選択してください"
+          >
             <el-option
               v-for="dict in dict.type.sys_user_sex"
               :key="dict.value"
@@ -262,64 +262,38 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="ステータス" prop="employeeWorkStatus">
-          <el-select
-            v-model="form.employeeWorkStatus"
-            placeholder="请选择ステータス"
-          >
-            <el-option
-              v-for="dict in dict.type.employee_status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="年齢" prop="employeeAge">
-          <el-input v-model="form.employeeAge" placeholder="请输入年齢" />
-        </el-form-item>
-        <el-form-item label="日本語レベル" prop="employeeJapaneseLevel">
-          <el-select
-            v-model="form.employeeJapaneseLevel"
-            placeholder="请选择日本語レベル"
-          >
-            <el-option
-              v-for="dict in dict.type.japanese_level"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="社員メール" prop="employeeMail">
+        <el-form-item label="電話番号" prop="phoneNumber">
           <el-input
-            v-model="form.employeeMail"
-            placeholder="请输入社員メール"
+            v-model="form.phoneNumber"
+            placeholder="社員電話番号を入力してください"
           />
         </el-form-item>
-        <el-form-item label="社員誕生日" prop="employeeBirthday">
+        <el-form-item label="メール" prop="employeeMail">
+          <el-input
+            v-model="form.employeeMail"
+            placeholder="社員メールを選択してください"
+          />
+        </el-form-item>
+        <el-form-item label="年齢" prop="employeeAge">
+          <el-input
+            v-model="form.employeeAge"
+            placeholder="年齢を入力してください"
+          />
+        </el-form-item>
+        <el-form-item label="誕生日" prop="employeeBirthday">
           <el-date-picker
             clearable
             v-model="form.employeeBirthday"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择社員誕生日"
+            placeholder="社員誕生日を選択してください"
           >
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="職務経験" prop="employeeWorkExperience">
-          <el-input
-            v-model="form.employeeWorkExperience"
-            placeholder="请输入職務経験"
-          />
-        </el-form-item>
-        <el-form-item label="案件名" prop="employeeEvent">
-          <el-input v-model="form.employeeEvent" placeholder="请输入案件名" />
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">登　録</el-button>
+        <el-button @click="cancel">キャンセル</el-button>
       </div>
     </el-dialog>
   </div>
@@ -376,14 +350,68 @@ export default {
       form: {},
       // 表单校验
       rules: {
+        staffId: [
+          {
+            required: true,
+            message: "社員ID入力してください",
+            trigger: "blur",
+          },
+        ],
+        phoneNumber: [
+          {
+            required: true,
+            message: "社員の電話番号入力してください",
+            trigger: "blur",
+          },
+          {
+            validator: (rule, value, callback) => {
+              // 半角数字のみ
+              if (!/^\d+$/.test(value)) {
+                callback(new Error("電話番号は半角数字のみで入力してください"));
+                return;
+              }
+
+              // 11桁
+              if (value.length !== 11) {
+                callback(new Error("電話番号は11桁で入力してください"));
+                return;
+              }
+
+              // 日本携帯番号
+              if (!/^(070|080|090)\d{8}$/.test(value)) {
+                callback(
+                  new Error(
+                    "日本の携帯電話番号（070/080/090）を入力してください"
+                  )
+                );
+                return;
+              }
+
+              callback();
+            },
+            trigger: "blur",
+          },
+        ],
+        employeeMail: [
+          {
+            required: true,
+            message: "社員メール入力してください",
+            trigger: "blur",
+          },
+        ],
         employeeName: [
-          { required: true, message: "従業員名不能为空", trigger: "blur" },
+          {
+            required: true,
+            message: "社員名入力してください",
+            trigger: "blur",
+          },
         ],
         employeeGender: [
-          { required: true, message: "性別不能为空", trigger: "change" },
-        ],
-        employeeWorkStatus: [
-          { required: true, message: "ステータス不能为空", trigger: "change" },
+          {
+            required: true,
+            message: "社員性別入力してください",
+            trigger: "change",
+          },
         ],
         employeeWorkExperience: [
           {
@@ -451,6 +479,7 @@ export default {
     reset() {
       this.form = {
         employeeId: null,
+        staffId: null,
         employeeName: null,
         employeeGender: null,
         employeeWorkStatus: null,
@@ -461,6 +490,7 @@ export default {
         employeeWorkExperience: null,
         caseId: null,
         caseName: null,
+        phoneNumber: null,
       };
       this.resetForm("form");
     },
@@ -484,7 +514,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加社員情報管理";
+      this.title = "新規社員";
     },
     toCaseDetail(row) {
       this.$router.push({
@@ -506,19 +536,12 @@ export default {
     submitForm() {
       this.$refs["form"].validate((valid) => {
         if (valid) {
-          if (this.form.employeeId != null) {
-            updateEmployee(this.form).then((response) => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addEmployee(this.form).then((response) => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+          this.form.employeeWorkStatus = "1";
+          addEmployee(this.form).then((response) => {
+            this.$modal.msgSuccess("社員が追加成功しました!");
+            this.open = false;
+            this.getList();
+          });
         }
       });
     },

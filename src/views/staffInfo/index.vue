@@ -11,7 +11,8 @@
         ref="form"
         :model="form"
         label-width="140px"
-        class="employee-form-readonly"
+        class="employee-form"
+        :rules="rules"
       >
         <el-row :gutter="20">
           <!-- 従業員名 -->
@@ -19,8 +20,7 @@
             <el-form-item label="従業員名" prop="employeeName">
               <el-input
                 v-model="form.employeeName"
-                placeholder="未記入"
-                disabled
+                placeholder="従業員名を入力"
               />
             </el-form-item>
           </el-col>
@@ -30,8 +30,7 @@
             <el-form-item label="性別" prop="employeeGender">
               <el-select
                 v-model="form.employeeGender"
-                placeholder="未記入"
-                disabled
+                placeholder="選択してください"
               >
                 <el-option
                   v-for="dict in dict.type.sys_user_sex"
@@ -46,10 +45,10 @@
           <!-- 年齢 -->
           <el-col :span="8">
             <el-form-item label="年齢" prop="employeeAge">
-              <el-input
-                :value="form.employeeAge != null ? form.employeeAge + '歳' : ''"
-                placeholder="未記入"
-                disabled
+              <el-input-number
+                v-model="form.employeeAge"
+                :min="0"
+                controls-position="right"
               />
             </el-form-item>
           </el-col>
@@ -57,10 +56,11 @@
           <!-- 生年月日 -->
           <el-col :span="8">
             <el-form-item label="生年月日" prop="employeeBirthday">
-              <el-input
+              <el-date-picker
                 v-model="form.employeeBirthday"
-                placeholder="未記入"
-                disabled
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="日付を選択"
               />
             </el-form-item>
           </el-col>
@@ -70,8 +70,7 @@
             <el-form-item label="日本語レベル" prop="employeeJapaneseLevel">
               <el-select
                 v-model="form.employeeJapaneseLevel"
-                placeholder="未記入"
-                disabled
+                placeholder="選択してください"
               >
                 <el-option
                   v-for="dict in dict.type.japanese_level"
@@ -85,15 +84,11 @@
 
           <!-- 職務経験 -->
           <el-col :span="8">
-            <el-form-item label="職務経験" prop="employeeWorkExperience">
-              <el-input
-                :value="
-                  form.employeeWorkExperience != null
-                    ? form.employeeWorkExperience + '年'
-                    : ''
-                "
-                placeholder="未記入"
-                disabled
+            <el-form-item label="職務経験（年）" prop="employeeWorkExperience">
+              <el-input-number
+                v-model="form.employeeWorkExperience"
+                :min="0"
+                controls-position="right"
               />
             </el-form-item>
           </el-col>
@@ -103,8 +98,7 @@
             <el-form-item label="メールアドレス" prop="employeeMail">
               <el-input
                 v-model="form.employeeMail"
-                placeholder="未記入"
-                disabled
+                placeholder="メールアドレスを入力"
               />
             </el-form-item>
           </el-col>
@@ -114,7 +108,7 @@
             <el-form-item label="在職ステータス" prop="employeeWorkStatus">
               <el-select
                 v-model="form.employeeWorkStatus"
-                placeholder="未記入"
+                placeholder="選択してください"
                 disabled
               >
                 <el-option
@@ -126,8 +120,6 @@
               </el-select>
             </el-form-item>
           </el-col>
-
-          <!-- 案件名 -->
           <el-col :span="8">
             <el-form-item label="案件名">
               <el-link
@@ -138,7 +130,8 @@
               >
                 {{ form.caseName }}
               </el-link>
-              <span v-else class="empty-text">現場なし</span>
+
+              <span v-else class="case-name-text empty-text"> 現場なし </span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -187,10 +180,23 @@
     </el-card>
 
     <!-- 技能情報管理 -->
-    <el-card :data="form.employeeSkills" class="info-card" shadow="hover">
+    <el-card
+      :data="form.employeeSkills"
+      class="info-card skill-card"
+      shadow="hover"
+    >
       <div slot="header" class="card-header">
         <i class="el-icon-setting"></i>
         <span>技能情報管理</span>
+        <el-button
+          type="primary"
+          size="small"
+          icon="el-icon-plus"
+          class="add-skill-btn"
+          @click="handleAddSkill"
+        >
+          追加
+        </el-button>
       </div>
 
       <el-table
@@ -207,9 +213,8 @@
           <template slot-scope="scope">
             <el-select
               v-model="scope.row.technologyId"
-              placeholder="未記入"
+              placeholder="技術を選択してください"
               style="width: 100%"
-              disabled
             >
               <el-option
                 v-for="tech in technologyList"
@@ -225,9 +230,8 @@
           <template slot-scope="scope">
             <el-select
               v-model="scope.row.proficiencyLevel"
-              placeholder="未記入"
+              placeholder="選択してください"
               style="width: 100%"
-              disabled
             >
               <el-option
                 v-for="dict in dict.type.skill_level"
@@ -241,29 +245,55 @@
 
         <el-table-column label="実際経験年限（年）" min-width="180">
           <template slot-scope="scope">
-            <el-input
-              :value="
-                scope.row.experienceYears != null
-                  ? scope.row.experienceYears + '年'
-                  : ''
-              "
-              placeholder="未記入"
+            <el-input-number
+              v-model="scope.row.experienceYears"
+              :min="0"
+              :max="50"
+              :precision="1"
+              :step="0.5"
+              controls-position="right"
               style="width: 100%"
-              disabled
             />
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="100" align="center" fixed="right">
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="small"
+              icon="el-icon-delete"
+              class="delete-btn"
+              @click="handleDeleteSkill(scope.$index)"
+            >
+              削除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
     <!-- 操作ボタン -->
     <div class="form-actions">
-      <el-button @click="handleBack"> キャンセル </el-button>
+      <el-button
+        v-if="isEditMode"
+        type="primary"
+        @click="handleUpdate"
+        :loading="submitLoading"
+      >
+        更新
+      </el-button>
     </div>
   </div>
 </template>
 
 <script>
-import { getEmployee, getCaseHistory } from "@/api/employee/employee";
+import {
+  updateEmployee,
+  addEmployee,
+  delEmployeeSkill,
+  getCaseHistory,
+  getEmployeeBySysUserId,
+} from "@/api/employee/employee";
 import { getAllTechnology } from "@/api/technology/technology";
 export default {
   name: "EmployeeDetail",
@@ -283,19 +313,66 @@ export default {
       form: {},
       technologyList: [],
       caseHistoryList: [],
+      rules: {
+        employeeName: [
+          { required: true, message: "従業員名不能为空", trigger: "blur" },
+        ],
+        employeeGender: [
+          { required: true, message: "性別不能为空", trigger: "change" },
+        ],
+        employeeWorkStatus: [
+          { required: true, message: "ステータス不能为空", trigger: "change" },
+        ],
+        employeeWorkExperience: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback();
+              } else if (!/^\d+$/.test(value)) {
+                callback(new Error("職務経験は数字で入力してください"));
+              } else {
+                callback();
+              }
+            },
+            trigger: "blur",
+          },
+        ],
+        employeeAge: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback();
+              } else if (!/^\d+$/.test(value)) {
+                callback(new Error("年齢は数字で入力してください"));
+              } else {
+                const age = parseInt(value, 10);
+                if (age < 18 || age > 65) {
+                  callback(
+                    new Error("年齢は18歳から65歳までで入力してください")
+                  );
+                } else {
+                  callback();
+                }
+              }
+            },
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   created() {
     this.getTechnologyList();
-    const id = this.$route.params.employeeId;
-    this.employeeId = this.$route.params.employeeId;
+    const id = this.$store.getters.id;
+    this.employeeId = this.$store.getters.id;
     // 判断是编辑模式还是新增模式
     if (id) {
+      this.isEditMode = true;
       // 编辑模式：加载员工数据
       this.getEmployeeById();
-      this.getCaseHistoryList();
     } else {
       // 新增模式：初始化空表单
+      this.isEditMode = false;
       this.form = {
         employeeName: "",
         employeeGender: "",
@@ -310,24 +387,48 @@ export default {
     }
   },
   methods: {
-    async getCaseHistoryList() {
+    async getCaseHistoryList(employeeId) {
       try {
-        const employeeId = this.$route.params.employeeId;
         const { data } = await getCaseHistory(employeeId);
         this.caseHistoryList = data;
       } catch (e) {
         this.$message.error("案件履歴の取得に失敗しました");
       }
     },
-    getEmployeeById() {
-      this.loading = true;
-      const id = this.$route.params.employeeId;
-      getEmployee(id).then((res) => {
+    async getEmployeeById() {
+      const sysUserId = this.$store.getters.id;
+      getEmployeeBySysUserId(sysUserId).then((res) => {
         this.form = res.data;
         if (!this.form.employeeSkills) {
           this.form.employeeSkills = [];
         }
+        this.form = res.data;
+        this.getCaseHistoryList(res.data.employeeId);
         this.loading = false;
+      });
+      if (!this.form.employeeSkills) {
+        this.form.employeeSkills = [];
+      }
+      this.loading = false;
+    },
+    // 更新ボタン
+    handleUpdate() {
+      this.submitLoading = true;
+      this.$refs["form"].validate((valid) => {
+        if (!valid) {
+          this.submitLoading = false;
+          return;
+        }
+        if (!this.validateEmployeeSkills()) {
+          this.submitLoading = false;
+          return;
+        }
+
+        updateEmployee(this.form).then((response) => {
+          this.getEmployeeById();
+          this.submitLoading = false;
+          this.$modal.msgSuccess("更新成功しました");
+        });
       });
     },
     // 返回上一页
@@ -347,6 +448,38 @@ export default {
           caseId: row.caseId,
         },
       });
+    },
+    // 添加技能
+    handleAddSkill() {
+      this.form.employeeSkills.push({
+        employeeTechnologyId: null,
+        technologyId: null,
+        proficiencyLevel: null,
+        experienceYears: 0,
+      });
+    },
+    // 删除技能
+    handleDeleteSkill(index) {
+      if (
+        this.form.employeeSkills[index] &&
+        this.form.employeeSkills[index].employeeTechnologyId != null
+      ) {
+        this.$confirm("この技能情報を削除してもよろしいですか？", "確認", {
+          confirmButtonText: "確定",
+          cancelButtonText: "キャンセル",
+          type: "warning",
+        })
+          .then(() => {
+            const id = this.form.employeeSkills[index].employeeTechnologyId;
+            delEmployeeSkill(id).then((response) => {
+              this.getEmployeeById();
+              this.$message.success("削除しました");
+            });
+          })
+          .catch(() => {});
+      } else {
+        this.form.employeeSkills.splice(index, 1);
+      }
     },
     validateEmployeeSkills() {
       const techIdSet = new Set();
@@ -658,42 +791,5 @@ export default {
 
 .empty-text {
   color: #909399; /* 比 placeholder 深一点的灰 */
-}
-.employee-form-readonly >>> .el-input.is-disabled .el-input__inner {
-  background-color: #ffffff;
-  color: #606266;
-}
-
-.employee-form-readonly >>> .el-select.is-disabled .el-input__inner {
-  background-color: #ffffff;
-  color: #606266;
-}
-/* 従業員基本情報 - 深蓝色 */
-.info-card:nth-child(1) .card-header {
-  background-color: #bbdefb;
-  padding: 12px 20px;
-  margin: -20px -20px 20px -20px;
-  border-radius: 12px 12px 0 0;
-}
-
-/* 社員案件履歴 - 淡黄色 */
-.info-card:nth-child(2) .card-header {
-  background-color: #fff9c4;
-  padding: 12px 20px;
-  margin: -20px -20px 20px -20px;
-  border-radius: 12px 12px 0 0;
-}
-
-/* 技能情報管理 - 成功绿 */
-.info-card:nth-child(3) .card-header {
-  background-color: #d4edda;
-  padding: 12px 20px;
-  margin: -20px -20px 20px -20px;
-  border-radius: 12px 12px 0 0;
-}
-.info-card:nth-child(3) >>> .el-input.is-disabled .el-input__inner,
-.info-card:nth-child(3) >>> .el-select.is-disabled .el-input__inner {
-  background-color: #ffffff;
-  color: #606266;
 }
 </style>

@@ -17,6 +17,13 @@ export function getEmployee(employeeId) {
   })
 }
 
+export function getEmployeeBySysUserId(sysUserId) {
+  return request({
+    url: '/employee/employee/getEmployeeBySysUserId/' + sysUserId,
+    method: 'get'
+  })
+}
+
 // 新增社員情報管理
 export function addEmployee(data) {
   return request({

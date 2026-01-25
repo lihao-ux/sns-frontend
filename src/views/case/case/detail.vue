@@ -5,6 +5,15 @@
       <div slot="header" class="card-header">
         <i class="el-icon-document"></i>
         <span>案件基本情報</span>
+        <el-button
+          type="primary"
+          size="small"
+          class="add-employee-btn"
+          :loading="aiLoading"
+          @click="toAiMatching"
+        >
+          AI推薦
+        </el-button>
       </div>
 
       <el-form
@@ -464,6 +473,17 @@
             prop="employeeWorkExperience"
             width="80"
           />
+          <el-table-column label="通勤時間" align="center" width="80">
+            <template slot-scope="scope">
+              {{
+                scope.row.commuteTime !== null &&
+                scope.row.commuteTime !== undefined &&
+                scope.row.commuteTime !== 0
+                  ? scope.row.commuteTime + "分"
+                  : "-"
+              }}
+            </template>
+          </el-table-column>
           <el-table-column label="技術能力" align="center" width="600">
             <template #default="scope">
               <span
@@ -570,6 +590,7 @@ import {
   updateCase,
   delCaseEmployee,
   exitCaseEmployee,
+  aiMatching,
 } from "@/api/case/case";
 import { getCustomersByName } from "@/api/customer/customer";
 import { getFreeEmployeeList } from "@/api/employee/employee";
@@ -584,6 +605,7 @@ export default {
   ],
   data() {
     return {
+      aiLoading: false,
       leaveDialogVisible: false,
       technologyList: [],
       queryParams: {
@@ -654,6 +676,44 @@ export default {
     this.getTechnologyList();
   },
   methods: {
+    toAiMatching() {
+      this.$confirm(
+        "案件概要を編集した場合は、AI推薦を実行する前に必ず「保存」を行ってください。未保存の内容は反映されません。",
+        "確認",
+        {
+          confirmButtonText: "確定",
+          cancelButtonText: "キャンセル",
+          type: "warning",
+        }
+      )
+        .then(() => {
+          this.$refs.form.validate((valid) => {
+            if (!valid) return;
+            if (!this.validEmployee()) return;
+            this.employeeFreeList = [];
+            this.aiLoading = true;
+
+            aiMatching(this.form)
+              .then((response) => {
+                this.aiLoading = false;
+
+                // 正常情况下的处理
+                if (response.code === 200) {
+                  this.employeeFreeList = response.data || [];
+                  this.total = response.total || 0;
+                  this.dialogVisible = true;
+                } else {
+                  // 处理其他错误码（非200的情况）
+                  this.$modal.msgError(response.msg || "操作失败");
+                }
+              })
+              .catch((error) => {
+                this.aiLoading = false;
+              });
+          });
+        })
+        .catch(() => {});
+    },
     getRoleLabel(value) {
       if (!value) {
         return "";

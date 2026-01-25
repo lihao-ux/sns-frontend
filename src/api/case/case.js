@@ -60,3 +60,10 @@ export function exitCaseEmployee(params) {
     params: params
   });
 }
+export function aiMatching(data) {
+  return request({
+    url: '/case/case/aiMatching',
+    method: 'post',
+    data: data
+  })
+}
