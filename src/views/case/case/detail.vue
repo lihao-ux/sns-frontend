@@ -491,23 +491,18 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column
-            label="駅"
-            align="center"
-            width="180"
-            v-if="aiFlag"
-          >
+          <el-table-column label="駅" align="center" width="180" v-if="aiFlag">
             <template slot-scope="scope">
               {{
-                scope.row.station !== null &&
-                form.caseStation !== undefined &&
-                form.caseStation !== null
-                  ? scope.row.station + "->"+form.caseStation
+                scope.row.commuteTime !== null &&
+                scope.row.commuteTime !== undefined &&
+                scope.row.commuteTime !== 0
+                  ? scope.row.station + "->" + form.caseStation
                   : "-"
               }}
             </template>
           </el-table-column>
-          <el-table-column label="技術能力" align="center" width="400">
+          <el-table-column label="技術能力" align="center" :width="aiFlag ? '400' : '600'">
             <template #default="scope">
               <span
                 v-if="
@@ -556,14 +551,7 @@
           @pagination="getFreeList"
         />
         <span slot="footer" class="dialog-footer">
-          <el-button
-            @click="
-              dialogVisible = false;
-              aiFlag = false;
-            "
-          >
-            閉じる
-          </el-button>
+          <el-button @click="handleToJiRu"> 閉じる </el-button>
         </span>
       </el-dialog>
       <el-dialog
@@ -707,6 +695,10 @@ export default {
     this.getTechnologyList();
   },
   methods: {
+    handleToJiRu(){
+      this.dialogVisible=false
+      this.aiFlag = false
+    },
     toAiMatching() {
       this.$confirm(
         "案件概要を編集した場合は、AI推薦を実行する前に必ず「保存」を行ってください。未保存の内容は反映されません。",
