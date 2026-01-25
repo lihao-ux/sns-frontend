@@ -281,13 +281,14 @@
     <div>
       <!-- 一覧表示ダイアログ -->
       <el-dialog
-        title="待機社員一覧"
+        :title="aiFlag ? 'AI推薦社員' : '待機社員一覧'"
         :visible.sync="dialogVisible"
         width="1400px"
         append-to-body
-        class="fixed-height-dialog"
+        :class="['fixed-height-dialog', { 'ai-dialog': aiFlag }]"
       >
         <el-form
+          v-if="!aiFlag"
           :model="queryParams"
           ref="queryForm"
           size="small"
@@ -414,7 +415,7 @@
           <el-table-column
             label="従業員ID"
             align="center"
-            prop="employeeId"
+            prop="staffId"
             width="100"
           />
           <el-table-column
@@ -474,7 +475,12 @@
             prop="employeeWorkExperience"
             width="80"
           />
-          <el-table-column label="通勤時間" align="center" width="80">
+          <el-table-column
+            label="通勤時間(電車)"
+            align="center"
+            width="120"
+            v-if="aiFlag"
+          >
             <template slot-scope="scope">
               {{
                 scope.row.commuteTime !== null &&
@@ -485,7 +491,23 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column label="技術能力" align="center" width="600">
+          <el-table-column
+            label="駅"
+            align="center"
+            width="180"
+            v-if="aiFlag"
+          >
+            <template slot-scope="scope">
+              {{
+                scope.row.station !== null &&
+                form.caseStation !== undefined &&
+                form.caseStation !== null
+                  ? scope.row.station + "->"+form.caseStation
+                  : "-"
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="技術能力" align="center" width="400">
             <template #default="scope">
               <span
                 v-if="
@@ -534,7 +556,14 @@
           @pagination="getFreeList"
         />
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false"> 閉じる </el-button>
+          <el-button
+            @click="
+              dialogVisible = false;
+              aiFlag = false;
+            "
+          >
+            閉じる
+          </el-button>
         </span>
       </el-dialog>
       <el-dialog
@@ -606,6 +635,7 @@ export default {
   ],
   data() {
     return {
+      aiFlag: false,
       aiLoading: false,
       leaveDialogVisible: false,
       technologyList: [],
@@ -702,7 +732,7 @@ export default {
                 if (response.code === 200) {
                   this.employeeFreeList = response.data || [];
                   this.total = response.total || 0;
-                  this.dialogVisible = true;
+                  (this.aiFlag = true), (this.dialogVisible = true);
                 } else {
                   // 处理其他错误码（非200的情况）
                   this.$modal.msgError(response.msg || "操作失败");
@@ -1046,6 +1076,30 @@ export default {
   right: 24px;
   bottom: 16px;
   padding: 0;
+}
+/* AI对话框 - 简洁高级感 */
+.ai-dialog >>> .el-dialog {
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8e8e8;
+}
+
+.ai-dialog >>> .el-dialog__header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.ai-dialog >>> .el-dialog__title {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1890ff;
+  letter-spacing: 0.5px;
+}
+
+.ai-dialog >>> .el-dialog__body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 </style>
 

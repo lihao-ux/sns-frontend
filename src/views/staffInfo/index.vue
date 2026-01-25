@@ -103,6 +103,16 @@
             </el-form-item>
           </el-col>
 
+          <!-- 最寄り駅 -->
+          <el-col :span="8">
+            <el-form-item label="最寄り駅" prop="station">
+              <el-input
+                v-model="form.station"
+                placeholder="最寄り駅を入力"
+              />
+            </el-form-item>
+          </el-col>
+
           <!-- 在職ステータス -->
           <el-col :span="8">
             <el-form-item label="在職ステータス" prop="employeeWorkStatus">

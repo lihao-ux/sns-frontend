@@ -24,6 +24,16 @@
               />
             </el-form-item>
           </el-col>
+          <!-- 年齢 -->
+          <el-col :span="8">
+            <el-form-item label="年齢" prop="employeeAge">
+              <el-input
+                :value="form.employeeAge != null ? form.employeeAge + '歳' : ''"
+                placeholder="未記入"
+                disabled
+              />
+            </el-form-item>
+          </el-col>
 
           <!-- 性別 -->
           <el-col :span="8">
@@ -40,17 +50,6 @@
                   :value="dict.value"
                 />
               </el-select>
-            </el-form-item>
-          </el-col>
-
-          <!-- 年齢 -->
-          <el-col :span="8">
-            <el-form-item label="年齢" prop="employeeAge">
-              <el-input
-                :value="form.employeeAge != null ? form.employeeAge + '歳' : ''"
-                placeholder="未記入"
-                disabled
-              />
             </el-form-item>
           </el-col>
 
@@ -139,6 +138,17 @@
                 {{ form.caseName }}
               </el-link>
               <span v-else class="empty-text">現場なし</span>
+            </el-form-item>
+          </el-col>
+
+          <!-- 最寄り駅 -->
+          <el-col :span="8">
+            <el-form-item label="最寄り駅" prop="station">
+              <el-input
+                v-model="form.station"
+                placeholder="未記入"
+                disabled
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -383,7 +393,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<<style scoped>
 .employee-detail {
   background-color: #fafbfc;
   padding: 24px;
@@ -429,133 +439,102 @@ export default {
   margin-left: auto;
 }
 
-/* 表单整体样式 */
-.employee-form {
-  padding: 16px 8px 8px;
+/* ========== 表单宽度修复 - 核心部分开始 ========== */
+.employee-form-readonly {
+  padding: 16px 0;
 }
 
-.employee-form /deep/ .el-row {
+/* 关键：确保所有el-col内的表单项宽度一致 */
+.employee-form-readonly >>> .el-row {
   display: flex;
   flex-wrap: wrap;
+  margin: 0 -10px;
 }
 
-.employee-form /deep/ .el-col-8 {
+.employee-form-readonly >>> .el-col {
   width: 33.333333%;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 0 10px;
   box-sizing: border-box;
-}
-
-/* 表单项样式 */
-.employee-form /deep/ .el-form-item {
   margin-bottom: 24px;
 }
 
-/* Label 固定宽度 */
-.employee-form /deep/ .el-form-item__label {
-  width: 140px !important;
+/* 强制表单项占满容器宽度 */
+.employee-form-readonly >>> .el-form-item {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  width: 100%;
+}
+
+/* 标签样式 */
+.employee-form-readonly >>> .el-form-item__label {
+  text-align: left;
+  margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
   color: #606266;
-  line-height: 36px;
-  text-align: left;
-  padding-right: 12px;
-  float: left;
-}
-
-/* 输入框容器 */
-.employee-form /deep/ .el-form-item__content {
-  margin-left: 140px !important;
-  line-height: 36px;
-}
-
-/* 关键：所有输入组件强制100%宽度 */
-.employee-form /deep/ .el-input,
-.employee-form /deep/ .el-select,
-.employee-form /deep/ .el-date-editor,
-.employee-form /deep/ .el-input-number {
+  line-height: 1.5;
   width: 100% !important;
+  float: none;
 }
 
-/* 输入框内部样式 */
-.employee-form /deep/ .el-input__inner {
+/* 内容区域 - 关键：100%宽度 */
+.employee-form-readonly >>> .el-form-item__content {
+  margin-left: 0 !important;
+  width: 100%;
+  line-height: 36px;
+  flex: 1;
+}
+
+/* 强制所有输入控件100%宽度 */
+.employee-form-readonly >>> .el-input,
+.employee-form-readonly >>> .el-select {
   width: 100% !important;
-  font-size: 14px;
-  color: #303133;
-  border-radius: 6px;
-  border: 1px solid #dcdfe6;
-  transition: all 0.3s ease;
+  display: block;
+}
+
+/* 确保内部输入框也100%宽度 */
+.employee-form-readonly >>> .el-input .el-input__inner,
+.employee-form-readonly >>> .el-select .el-input__inner {
+  width: 100% !important;
+  box-sizing: border-box;
   height: 36px;
   line-height: 36px;
 }
 
-.employee-form /deep/ .el-input__inner:focus,
-.employee-form /deep/ .el-input__inner:hover {
-  border-color: #409eff;
-}
-
-/* Select 下拉框样式 */
-.employee-form /deep/ .el-select {
+/* 链接样式 */
+.employee-form-readonly >>> .el-link {
   display: block;
-  width: 100% !important;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 36px;
+  line-height: 36px;
+}
+/* ========== 表单宽度修复 - 核心部分结束 ========== */
+
+/* 原有样式继续 */
+.empty-text {
+  display: inline-block;
+  width: 100%;
+  color: #909399;
+  height: 36px;
+  line-height: 36px;
 }
 
-.employee-form /deep/ .el-select .el-input {
-  width: 100% !important;
+/* 只读模式下的样式 */
+.employee-form-readonly >>> .el-input.is-disabled .el-input__inner,
+.employee-form-readonly >>> .el-select.is-disabled .el-input__inner {
+  background-color: #ffffff;
+  color: #606266;
+  border-color: #e4e7ed;
+  cursor: default;
 }
 
-.employee-form /deep/ .el-select .el-input__inner {
-  cursor: pointer;
-}
-
-/* Date Picker 样式 */
-.employee-form /deep/ .el-date-editor {
-  display: block;
-  width: 100% !important;
-}
-
-.employee-form /deep/ .el-date-editor .el-input__inner {
-  padding-left: 30px;
-}
-
-.employee-form /deep/ .el-date-editor .el-input__prefix {
-  left: 8px;
-}
-
-/* Input Number 样式 */
-.employee-form /deep/ .el-input-number {
-  display: block;
-  width: 100% !important;
-}
-
-.employee-form /deep/ .el-input-number .el-input {
-  width: 100% !important;
-}
-
-.employee-form /deep/ .el-input-number .el-input__inner {
-  width: 100% !important;
-  text-align: left;
-  padding-left: 12px;
-  padding-right: 50px;
-}
-
-.employee-form /deep/ .el-input-number__decrease,
-.employee-form /deep/ .el-input-number__increase {
-  background: #f5f7fa;
-  border-left: 1px solid #dcdfe6;
-  width: 36px;
-}
-
-.employee-form /deep/ .el-input-number__decrease:hover,
-.employee-form /deep/ .el-input-number__increase:hover {
-  color: #409eff;
-  background: #ecf5ff;
-}
-
-/* Placeholder 样式 */
-.employee-form /deep/ .el-input__inner::placeholder {
-  color: #c0c4cc;
-  font-size: 13px;
+/* 可选：如果希望有更明显的禁用状态 */
+.employee-form-readonly >>> .el-input.is-disabled .el-input__inner {
+  background-color: #f5f7fa;
 }
 
 /* 技能表格样式 */
@@ -567,27 +546,27 @@ export default {
   margin-top: 16px;
 }
 
-.skill-table /deep/ .el-table__header th {
+.skill-table >>> .el-table__header th {
   background-color: #f5f7fa;
   color: #606266;
   font-weight: 600;
   font-size: 14px;
 }
 
-.skill-table /deep/ .el-table__body td {
+.skill-table >>> .el-table__body td {
   padding: 12px 0;
 }
 
-.skill-table /deep/ .el-input__inner {
+.skill-table >>> .el-input__inner {
   height: 32px;
   line-height: 32px;
 }
 
-.skill-table /deep/ .el-input-number {
+.skill-table >>> .el-input-number {
   width: 100%;
 }
 
-.skill-table /deep/ .el-input-number .el-input__inner {
+.skill-table >>> .el-input-number .el-input__inner {
   height: 32px;
   line-height: 32px;
   text-align: left;
@@ -595,8 +574,8 @@ export default {
   padding-right: 45px;
 }
 
-.skill-table /deep/ .el-input-number__decrease,
-.skill-table /deep/ .el-input-number__increase {
+.skill-table >>> .el-input-number__decrease,
+.skill-table >>> .el-input-number__increase {
   width: 32px;
   line-height: 30px;
 }
@@ -627,6 +606,7 @@ export default {
   font-size: 14px;
   margin: 0;
 }
+
 /* 底部操作按钮区域 */
 .form-actions {
   display: flex;
@@ -643,22 +623,25 @@ export default {
   font-size: 15px;
   font-weight: 500;
 }
+
 .case-history-empty {
   padding: 24px 0;
   text-align: center;
   color: #909399;
   font-size: 14px;
 }
+
 .case-name-text {
   display: inline-block;
   height: 32px;
   line-height: 32px;
-  color: #606266; /* Element UI 默认深灰 */
+  color: #606266;
 }
 
 .empty-text {
-  color: #909399; /* 比 placeholder 深一点的灰 */
+  color: #909399;
 }
+
 .employee-form-readonly >>> .el-input.is-disabled .el-input__inner {
   background-color: #ffffff;
   color: #606266;
@@ -668,6 +651,7 @@ export default {
   background-color: #ffffff;
   color: #606266;
 }
+
 /* 従業員基本情報 - 深蓝色 */
 .info-card:nth-child(1) .card-header {
   background-color: #bbdefb;
@@ -691,9 +675,47 @@ export default {
   margin: -20px -20px 20px -20px;
   border-radius: 12px 12px 0 0;
 }
+
 .info-card:nth-child(3) >>> .el-input.is-disabled .el-input__inner,
 .info-card:nth-child(3) >>> .el-select.is-disabled .el-input__inner {
   background-color: #ffffff;
   color: #606266;
+}
+
+/* 案件履歴折叠面板样式 */
+.case-history-collapse >>> .el-collapse-item__header {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  background-color: #f5f7fa;
+  border-radius: 6px;
+  padding: 0 16px;
+}
+
+.case-history-collapse >>> .el-collapse-item__wrap {
+  background-color: transparent;
+  border: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .employee-form-readonly >>> .el-col {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .employee-form-readonly >>> .el-col {
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-actions .el-button {
+    width: 100%;
+  }
 }
 </style>
