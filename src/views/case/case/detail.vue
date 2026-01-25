@@ -9,6 +9,7 @@
           type="primary"
           size="small"
           class="add-employee-btn"
+          v-if="isEditMode"
           :loading="aiLoading"
           @click="toAiMatching"
         >
