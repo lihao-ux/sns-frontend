@@ -125,30 +125,44 @@
               </el-select>
             </el-form-item>
           </el-col>
-
-          <!-- 案件名 -->
-          <el-col :span="8">
-            <el-form-item label="案件名">
-              <el-link
-                v-if="form.caseName"
-                type="primary"
-                :underline="false"
-                @click="toCaseDetail(form)"
-              >
-                {{ form.caseName }}
-              </el-link>
-              <span v-else class="empty-text">現場なし</span>
-            </el-form-item>
-          </el-col>
-
           <!-- 最寄り駅 -->
           <el-col :span="8">
             <el-form-item label="最寄り駅" prop="station">
-              <el-input
-                v-model="form.station"
-                placeholder="未記入"
-                disabled
-              />
+              <el-input v-model="form.station" placeholder="未記入" disabled />
+            </el-form-item>
+          </el-col>
+          <!-- 案件名 -->
+          <!-- 案件名 -->
+          <el-col :span="8">
+            <el-form-item label="案件名">
+              <div class="case-name-wrapper">
+                <el-link
+                  v-if="form.caseName"
+                  type="primary"
+                  :underline="false"
+                  @click="toCaseDetail(form)"
+                >
+                  {{ form.caseName }}
+                </el-link>
+                <span v-else class="empty-text">現場なし</span>
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="履歴書">
+              <div style="display: flex; align-items: center">
+                <div class="case-name-wrapper" style="flex: 1">
+                  <el-link
+                    v-if="form.resumeFile"
+                    type="primary"
+                    :underline="false"
+                    @click="downloadFile(form.resumeFile)"
+                  >
+                    {{ form.resumeFile || "履歴書.xlsx" }}
+                  </el-link>
+                  <span v-else class="empty-text">未アップロード</span>
+                </div>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -273,7 +287,7 @@
 </template>
 
 <script>
-import { getEmployee, getCaseHistory } from "@/api/employee/employee";
+import { getEmployee, getCaseHistory,downloadResume} from "@/api/employee/employee";
 import { getAllTechnology } from "@/api/technology/technology";
 export default {
   name: "EmployeeDetail",
@@ -320,6 +334,51 @@ export default {
     }
   },
   methods: {
+    downloadFile(fileName) {
+      if (!fileName) {
+        this.$modal.msgWarning("ファイル名が存在しません");
+        return;
+      }
+
+      const loading = this.$loading({
+        lock: true,
+        text: "ダウンロード中...",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
+      downloadResume(fileName)
+        .then(async (response) => {
+          loading.close();
+
+          // 判断是否是错误响应（后端抛出异常时返回JSON）
+          if (response.type === "application/json") {
+            // 将 Blob 转为文本读取错误信息
+            const text = await response.text();
+            const errorData = JSON.parse(text);
+            // 显示后端返回的错误信息：ファイルが存在しません
+            this.$modal.msgError(errorData.msg);
+            return;
+          }
+
+          // 正常下载文件
+          const blob = new Blob([response]);
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          this.$modal.msgSuccess("ダウンロード成功");
+        })
+        .catch((error) => {
+          loading.close();
+          console.error("Download error:", error);
+          this.$modal.msgError("ダウンロード失敗しました");
+        });
+    },
     async getCaseHistoryList() {
       try {
         const employeeId = this.$route.params.employeeId;
@@ -717,5 +776,17 @@ export default {
   .form-actions .el-button {
     width: 100%;
   }
+}
+/* .case-name-wrapper {
+  border-bottom: 1px solid #DCDFE6;
+  padding-bottom: 4px;
+  min-height: 32px;
+  line-height: 32px;
+} */
+.case-name-wrapper {
+  border-bottom: 1px solid #DCDFE6;
+  padding: 5px 0;
+  min-height: 32px;
+  line-height: 32px;
 }
 </style>

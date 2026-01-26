@@ -106,10 +106,7 @@
           <!-- 最寄り駅 -->
           <el-col :span="8">
             <el-form-item label="最寄り駅" prop="station">
-              <el-input
-                v-model="form.station"
-                placeholder="最寄り駅を入力"
-              />
+              <el-input v-model="form.station" placeholder="最寄り駅を入力" />
             </el-form-item>
           </el-col>
 
@@ -132,16 +129,46 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="案件名">
-              <el-link
-                v-if="form.caseName"
-                type="primary"
-                :underline="false"
-                @click="toCaseDetail(form)"
-              >
-                {{ form.caseName }}
-              </el-link>
+              <div class="case-name-wrapper">
+                <span
+                  class="case-name-text"
+                  :class="{ 'is-empty': !form.caseName }"
+                >
+                  {{ form.caseName || "現場なし" }}
+                </span>
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="履歴書">
+              <div class="resume-row">
+                <div class="resume-text-wrapper">
+                  <el-link
+                    v-if="form.resumeFile"
+                    type="primary"
+                    :underline="false"
+                    class="resume-text"
+                    @click="downloadFile(form.resumeFile)"
+                  >
+                    {{ form.resumeFile }}
+                  </el-link>
 
-              <span v-else class="case-name-text empty-text"> 現場なし </span>
+                  <span v-else class="resume-text empty-text">
+                    履歴書なし
+                  </span>
+                </div>
+
+                <!-- 右：按钮 -->
+                <el-upload
+                  action="#"
+                  :show-file-list="false"
+                  :http-request="uploadResumeFile"
+                >
+                  <el-button size="small" type="primary">
+                    アップロード
+                  </el-button>
+                </el-upload>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -299,10 +326,11 @@
 <script>
 import {
   updateEmployee,
-  addEmployee,
+  uploadResume,
   delEmployeeSkill,
   getCaseHistory,
   getEmployeeBySysUserId,
+  downloadResume,
 } from "@/api/employee/employee";
 import { getAllTechnology } from "@/api/technology/technology";
 export default {
@@ -397,6 +425,84 @@ export default {
     }
   },
   methods: {
+    downloadFile(fileName) {
+      if (!fileName) {
+        this.$modal.msgWarning("ファイル名が存在しません");
+        return;
+      }
+
+      const loading = this.$loading({
+        lock: true,
+        text: "ダウンロード中...",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+
+      downloadResume(fileName)
+        .then(async (response) => {
+          loading.close();
+
+          // 判断是否是错误响应（后端抛出异常时返回JSON）
+          if (response.type === "application/json") {
+            // 将 Blob 转为文本读取错误信息
+            const text = await response.text();
+            const errorData = JSON.parse(text);
+            this.$modal.msgError(errorData.msg);
+            this.getEmployeeById();
+            return;
+          }
+
+          // 正常下载文件
+          const blob = new Blob([response]);
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          this.$modal.msgSuccess("ダウンロード成功");
+        })
+        .catch((error) => {
+          loading.close();
+          console.error("Download error:", error);
+          this.$modal.msgError("ダウンロード失敗しました");
+        });
+    },
+    uploadResumeFile(option) {
+      const file = option.file;
+      const fileName = file.name || "";
+      const fileType = fileName
+        .substring(fileName.lastIndexOf(".") + 1)
+        .toLowerCase();
+      const isAllowedType = ["pdf", "xls", "xlsx"].includes(fileType);
+      if (!isAllowedType) {
+        this.$message.error(
+          "PDFまたはExcelファイル（.pdf, .xls, .xlsx）のみアップロード可能です"
+        );
+        return;
+      }
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        this.$message.error("履歴書ファイルは2MBを超えることはできません");
+        return;
+      }
+      const formData = new FormData();
+      console.log(this.form.staffId);
+      formData.append("staffId", this.form.staffId);
+      formData.append("file", option.file);
+
+      uploadResume(formData)
+        .then(() => {
+          this.$message.success("アップロード成功");
+          option.onSuccess();
+          this.getEmployeeById();
+        })
+        .catch(() => {
+          option.onError();
+        });
+    },
     async getCaseHistoryList(employeeId) {
       try {
         const { data } = await getCaseHistory(employeeId);
@@ -792,14 +898,50 @@ export default {
   color: #909399;
   font-size: 14px;
 }
-.case-name-text {
+.empty-text {
+  color: #909399;
+}
+.resume-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.resume-text-wrapper {
+  flex: 1;
+  margin-right: 8px;
+  border-bottom: 1px solid #dcdfe6;
+  padding: 0 15px;
+  height: 40px;
+  line-height: 40px;
+}
+
+.resume-text {
   display: inline-block;
-  height: 32px;
-  line-height: 32px;
-  color: #606266; /* Element UI 默认深灰 */
+  width: auto;
 }
 
 .empty-text {
-  color: #909399; /* 比 placeholder 深一点的灰 */
+  color: #909399;
+  border-bottom-color: #dcdfe6;
+}
+.case-name-wrapper {
+  width: 100%;
+  height: 36px; /* 和 el-input 一致 */
+  line-height: 36px;
+  border-bottom: 1px solid #dcdfe6;
+  padding: 0 12px; /* 和 input 内边距接近 */
+  box-sizing: border-box;
+}
+
+.case-name-text {
+  color: #606266;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.case-name-text.is-empty {
+  color: #909399;
 }
 </style>

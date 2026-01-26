@@ -78,3 +78,25 @@ export function getFreeEmployeeList(queryParams) {
   })
 }
 
+export function uploadResume(data) {
+  return request({
+    url: "/employee/employee/upload",
+    method: "post",
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    transformRequest: [function (data) {
+      return data  // 直接返回FormData，不要转换
+    }]
+  });
+}
+
+export function downloadResume(fileName) {
+  return request({
+    url: '/employee/employee/download',
+    method: 'get',
+    params: { fileName: fileName },
+    responseType: 'blob'
+  })
+}
