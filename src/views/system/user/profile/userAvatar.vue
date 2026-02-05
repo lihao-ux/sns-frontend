@@ -161,24 +161,40 @@ export default {
 .user-info-head {
   position: relative;
   display: inline-block;
-  height: 120px;
+  width: 120px;  /* 明确宽度 */
+  height: 120px; /* 明确高度 */
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 .user-info-head:hover:after {
   content: '+';
   position: absolute;
   left: 0;
-  right: 0;
   top: 0;
-  bottom: 0;
+  width: 100%;   /* 撑满父容器 */
+  height: 100%;  /* 撑满父容器 */
   color: #eee;
   background: rgba(0, 0, 0, 0.5);
   font-size: 24px;
   font-style: normal;
+  
+  /* 核心修复：使用 flex 布局实现精准居中 */
+  display: flex;
+  align-items: center;     /* 垂直居中 */
+  justify-content: center;  /* 水平居中 */
+  
+  border-radius: 50%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: pointer;
-  line-height: 110px;
+}
+
+/* 确保图片本身也是圆的且大小一致 */
+.img-circle {
   border-radius: 50%;
+}
+.img-lg {
+  width: 120px;
+  height: 120px;
 }
 </style>

@@ -25,7 +25,9 @@
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="tree" />所属部门
-                <div class="pull-right" v-if="user.dept">{{ user.dept.deptName }} / {{ postGroup }}</div>
+                <div class="pull-right" v-if="user.dept">
+                  {{ user.dept.deptName }} / {{ postGroup }}
+                </div>
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="peoples" />所属角色
@@ -59,10 +61,10 @@
 </template>
 
 <script>
-import userAvatar from "./userAvatar"
-import userInfo from "./userInfo"
-import resetPwd from "./resetPwd"
-import { getUserProfile } from "@/api/system/user"
+import userAvatar from "./userAvatar";
+import userInfo from "./userInfo";
+import resetPwd from "./resetPwd";
+import { getUserProfile } from "@/api/system/user";
 
 export default {
   name: "Profile",
@@ -72,24 +74,24 @@ export default {
       user: {},
       roleGroup: {},
       postGroup: {},
-      selectedTab: "userinfo"
-    }
+      selectedTab: "userinfo",
+    };
   },
   created() {
-    const activeTab = this.$route.params && this.$route.params.activeTab
+    const activeTab = this.$route.params && this.$route.params.activeTab;
     if (activeTab) {
-      this.selectedTab = activeTab
+      this.selectedTab = activeTab;
     }
-    this.getUser()
+    this.getUser();
   },
   methods: {
     getUser() {
-      getUserProfile().then(response => {
-        this.user = response.data
-        this.roleGroup = response.roleGroup
-        this.postGroup = response.postGroup
-      })
-    }
-  }
-}
+      getUserProfile().then((response) => {
+        this.user = response.data;
+        this.roleGroup = response.roleGroup;
+        this.postGroup = response.postGroup;
+      });
+    },
+  },
+};
 </script>
