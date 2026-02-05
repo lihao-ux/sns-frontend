@@ -100,7 +100,7 @@ export default {
       this.$refs["form"].validate((valid) => {
         if (valid) {
           updateUserProfile(this.form).then((response) => {
-            this.$modal.msgSuccess("修改成功");
+            this.$modal.msgSuccess("更新成功しました");
             this.user.phonenumber = this.form.phonenumber;
             this.user.email = this.form.email;
           });
