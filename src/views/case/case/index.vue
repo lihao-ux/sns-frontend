@@ -29,7 +29,7 @@
       <el-form-item label="案件名" prop="caseName">
         <el-input
           v-model="queryParams.caseName"
-          placeholder="请输入案件名"
+          placeholder="案件名を入力してください"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -37,7 +37,7 @@
       <el-form-item label="勤務形態" prop="caseWorkStyle">
         <el-select
           v-model="queryParams.caseWorkStyle"
-          placeholder="请选择勤務形態"
+          placeholder="勤務形態を選択してください"
           clearable
         >
           <el-option
@@ -54,10 +54,10 @@
           icon="el-icon-search"
           size="mini"
           @click="handleQuery"
-          >搜索</el-button
+          >検索</el-button
         >
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery"
-          >重置</el-button
+          >リセット</el-button
         >
       </el-form-item>
     </el-form>
@@ -378,6 +378,7 @@ export default {
         caseSummary: null,
         caseWorkStyle: null,
         caseStation: null,
+        location: null,
       };
       this.resetForm("form");
     },

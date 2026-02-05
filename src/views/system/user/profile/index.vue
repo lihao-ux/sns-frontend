@@ -42,13 +42,13 @@
       <el-col :span="18" :xs="24">
         <el-card>
           <div slot="header" class="clearfix">
-            <span>基本资料</span>
+            <span>基本情報</span>
           </div>
           <el-tabs v-model="selectedTab">
-            <el-tab-pane label="基本资料" name="userinfo">
+            <el-tab-pane label="基本情報" name="userinfo">
               <userInfo :user="user" />
             </el-tab-pane>
-            <el-tab-pane label="修改密码" name="resetPwd">
+            <el-tab-pane label="パスワード変更" name="resetPwd">
               <resetPwd />
             </el-tab-pane>
           </el-tabs>

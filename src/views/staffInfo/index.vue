@@ -106,10 +106,13 @@
           <!-- 最寄り駅 -->
           <el-col :span="8">
             <el-form-item label="最寄り駅" prop="station">
-              <el-input v-model="form.station" placeholder="最寄り駅を入力" />
+              <el-input
+                v-model="form.station"
+                placeholder="最寄り駅を入力"
+                ref="searchBox"
+              />
             </el-form-item>
           </el-col>
-
           <!-- 在職ステータス -->
           <el-col :span="8">
             <el-form-item label="在職ステータス" prop="employeeWorkStatus">
@@ -344,6 +347,8 @@ export default {
   ],
   data() {
     return {
+      isStationSelected: false,
+      lastValidStation: "", 
       activeHistoryNames: ["0"],
       employeeId: null,
       loading: false,
@@ -421,10 +426,80 @@ export default {
         employeeWorkStatus: "",
         employeeMail: "",
         employeeSkills: [],
+        location: null,
       };
     }
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.initGoogle();
+    });
+  },
   methods: {
+    initGoogle() {
+      const inputEl = this.$refs.searchBox.$el.querySelector("input");
+
+      const autocomplete = new google.maps.places.Autocomplete(inputEl, {
+        componentRestrictions: { country: "jp" },
+        fields: ["geometry", "name"],
+        locationBias: {
+          center: { lat: 35.681236, lng: 139.767125 },
+          radius: 120000,
+        },
+      });
+
+      // 1. 监听输入：只要用户动手打字，就认为还没选中，并设为 false
+      inputEl.addEventListener("input", () => {
+        this.isStationSelected = false;
+      });
+
+      // 2. 监听失去焦点：如果没选中，则清空
+      inputEl.addEventListener("blur", () => {
+        // 延迟执行，防止点击建议项的操作被抢先清空
+        setTimeout(() => {
+          if (!this.isStationSelected) {
+            this.form.station = "";
+            this.form.location = "";
+            inputEl.value = "";
+            // 如果你需要提示，可以加：this.$message.warning("リストから駅を選択してください");
+          }
+        }, 250);
+      });
+
+      // 3. 选中后的逻辑
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+
+        // 如果没有 geometry，说明是随便打字按了回车
+        if (!place.geometry) {
+          this.isStationSelected = false;
+          return;
+        }
+
+        // 校验是否是车站
+        if (!place.name || !place.name.endsWith("駅")) {
+          this.isStationSelected = false;
+          this.form.station = "";
+          this.form.location = "";
+          this.$message.warning("駅以外は選択できません");
+          inputEl.value = "";
+          return;
+        }
+
+        // ✅ 运行到这里说明真正选中了车站
+        this.isStationSelected = true;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        let stationName = place.name.split(" (")[0].trim();
+
+        this.form.station = stationName;
+        this.form.location = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+
+        this.$nextTick(() => {
+          if (inputEl) inputEl.value = stationName;
+        });
+      });
+    },
     downloadFile(fileName) {
       if (!fileName) {
         this.$modal.msgWarning("ファイル名が存在しません");
@@ -539,7 +614,9 @@ export default {
           this.submitLoading = false;
           return;
         }
-
+        if (this.form.station === "") {
+          this.form.location = "";
+        }
         updateEmployee(this.form).then((response) => {
           this.getEmployeeById();
           this.submitLoading = false;

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container case-detail">
-    <!-- 案件基本信息 -->
+    <!-- 案件基本情報 -->
     <el-card class="info-card" shadow="hover">
       <div slot="header" class="card-header">
         <i class="el-icon-document"></i>
@@ -25,7 +25,7 @@
         class="case-form"
       >
         <el-row :gutter="20">
-          <!-- 左侧：其他字段 -->
+          <!-- 左侧:其他字段 -->
           <el-col :span="12">
             <el-row :gutter="20">
               <!-- お客様 -->
@@ -132,15 +132,15 @@
                 <el-form-item label="最寄り駅" prop="caseStation">
                   <el-input
                     v-model="form.caseStation"
-                    placeholder="駅名を入力"
-                    maxlength="20"
+                    placeholder="最寄り駅を入力"
+                    ref="searchBox"
                   />
                 </el-form-item>
               </el-col>
             </el-row>
           </el-col>
 
-          <!-- 右侧：案件概要 -->
+          <!-- 右侧:案件概要 -->
           <el-col :span="12">
             <el-form-item
               label="案件概要"
@@ -189,7 +189,7 @@
 
         <el-table-column label="社員ID" min-width="100" align="center">
           <template slot-scope="scope">
-            <span>{{ scope.row.employeeId || "-" }}</span>
+            <span>{{ scope.row.staffId || "-" }}</span>
           </template>
         </el-table-column>
 
@@ -360,7 +360,7 @@
             gap: 8px;
           "
         >
-          <span style="margin-right: 4px; font-weight: bold">※技術能力：</span>
+          <span style="margin-right: 4px; font-weight: bold">※技術能力:</span>
           <div style="display: flex; align-items: center; gap: 4px">
             <span
               style="
@@ -412,6 +412,13 @@
           border
           style="width: 100%"
         >
+          <template slot="empty">
+            <div style="padding: 20px">
+              <p style="margin-top: 10px; color: #909399">
+                該当する待機社員が見つかりませんでした。
+              </p>
+            </div>
+          </template>
           <el-table-column
             label="従業員ID"
             align="center"
@@ -486,7 +493,7 @@
                 scope.row.commuteTime !== null &&
                 scope.row.commuteTime !== undefined &&
                 scope.row.commuteTime !== 0
-                  ? scope.row.commuteTime + "分"
+                  ? scope.row.commuteTime
                   : "-"
               }}
             </template>
@@ -502,7 +509,11 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column label="技術能力" align="center" :width="aiFlag ? '400' : '600'">
+          <el-table-column
+            label="技術能力"
+            align="center"
+            :width="aiFlag ? '400' : '600'"
+          >
             <template #default="scope">
               <span
                 v-if="
@@ -529,7 +540,7 @@
           <el-table-column
             label="アクション"
             align="center"
-            width="100"
+            width="200"
             fixed="right"
           >
             <template #default="scope">
@@ -539,6 +550,13 @@
                 @click="handleEnter(scope.row)"
               >
                 入場
+              </el-button>
+              <el-button
+                type="warning"
+                size="mini"
+                @click="parseResume(scope.row)"
+              >
+                AI分析
               </el-button>
             </template>
           </el-table-column>
@@ -596,6 +614,42 @@
           <el-button type="primary" @click="confirmLeave"> 確定 </el-button>
         </span>
       </el-dialog>
+      <el-dialog
+        title="AI 履歴書分析レポート"
+        :visible.sync="dialogVisibleForAi"
+        width="1000px"
+        @closed="resetText"
+      >
+        <div class="ai-report-container">
+          <pre
+            class="typing-content">{{ displayText }}<span class="cursor">|</span></pre>
+        </div>
+        <span slot="footer">
+          <el-button
+            type="primary"
+            @click="dialogVisibleForAi = false"
+            :disabled="isTyping"
+            >確認</el-button
+          >
+        </span>
+      </el-dialog>
+      <transition name="fade">
+        <div v-if="isAnalyzing" class="ai-loading-overlay">
+          <div class="ai-loading-content">
+            <div class="ai-scanner">
+              <div class="inner-core"></div>
+              <div class="scan-line"></div>
+            </div>
+
+            <p class="loading-text">AIが経歴書を解析しています...</p>
+
+            <div class="status-tags">
+              <span class="tag-item">スキル照合中...</span>
+              <span class="tag-item">案件適合性判定中...</span>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -609,6 +663,7 @@ import {
   delCaseEmployee,
   exitCaseEmployee,
   aiMatching,
+  resumeParseByAi,
 } from "@/api/case/case";
 import { getCustomersByName } from "@/api/customer/customer";
 import { getFreeEmployeeList } from "@/api/employee/employee";
@@ -623,6 +678,15 @@ export default {
   ],
   data() {
     return {
+      isAnalyzing: false,
+      dialogVisibleForAi: false,
+      fullText: "", // 格式化后的完整字符串
+      displayText: "", // 当前显示的字符串
+      timer: null,
+      speed: 20, // 打字速度 (ms/字)
+      isTyping: false,
+      isStationSelected: false,
+      lastValidStation: "",
       aiFlag: false,
       aiLoading: false,
       leaveDialogVisible: false,
@@ -694,10 +758,130 @@ export default {
     }
     this.getTechnologyList();
   },
+  mounted() {
+    this.$nextTick(() => {
+      this.initGoogle();
+    });
+  },
   methods: {
-    handleToJiRu(){
-      this.dialogVisible=false
-      this.aiFlag = false
+    showReport(resData) {
+      this.fullText = resData;
+      this.displayText = "";
+      this.dialogVisibleForAi = true;
+      this.startTyping();
+    },
+
+    // 3. 模拟流式打字逻辑
+    startTyping() {
+      this.isTyping = true;
+      let i = 0;
+      this.timer = setInterval(() => {
+        if (i < this.fullText.length) {
+          this.displayText += this.fullText.charAt(i);
+          i++;
+          // 自动滚动到底部（可选）
+          this.$nextTick(() => {
+            const container = this.$el.querySelector(".ai-report-container");
+            if (container) container.scrollTop = container.scrollHeight;
+          });
+        } else {
+          clearInterval(this.timer);
+          this.isTyping = false;
+        }
+      }, this.speed);
+    },
+
+    resetText() {
+      clearInterval(this.timer);
+      this.displayText = "";
+    },
+    parseResume(employee) {
+      this.isAnalyzing = true;
+      resumeParseByAi({
+        resumeFile: employee.resumeFile,
+        caseSummary: this.form.caseSummary,
+      })
+        .then((response) => {
+          this.isAnalyzing = false;
+          this.showReport(response.msg);
+        })
+        .catch((error) => {
+          // 异常处理
+          this.isAnalyzing = false;
+          this.$message.error(
+            "AI解析に失敗しました。後ほど再試行してください。"
+          );
+        });
+    },
+    initGoogle() {
+      const inputEl = this.$refs.searchBox.$el.querySelector("input");
+
+      const autocomplete = new google.maps.places.Autocomplete(inputEl, {
+        componentRestrictions: { country: "jp" },
+        fields: ["geometry", "name"],
+        locationBias: {
+          center: { lat: 35.681236, lng: 139.767125 },
+          radius: 120000,
+        },
+      });
+
+      // 1. 监听输入：只要用户动手打字，就认为还没选中，并设为 false
+      inputEl.addEventListener("input", () => {
+        this.isStationSelected = false;
+      });
+
+      // 2. 监听失去焦点：如果没选中，则清空
+      inputEl.addEventListener("blur", () => {
+        // 延迟执行，防止点击建议项的操作被抢先清空
+        setTimeout(() => {
+          if (!this.isStationSelected) {
+            this.form.caseStation = "";
+            console.log("caseStation=", this.form.caseStation);
+
+            this.form.location = "";
+            inputEl.value = "";
+            // 如果你需要提示，可以加：this.$message.warning("リストから駅を選択してください");
+          }
+        }, 250);
+      });
+
+      // 3. 选中后的逻辑
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry) {
+          this.isStationSelected = true;
+          return;
+        }
+
+        if (!place.name || !place.name.endsWith("駅")) {
+          this.isStationSelected = false;
+          this.form.caseStation = ""; // 确保这里也清空
+          this.form.location = "";
+          this.$message.warning("駅以外は選択できません");
+          inputEl.value = "";
+          return;
+        }
+
+        this.isStationSelected = true;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        // 修正：直接拿原始名称，如果想去掉括号，确保“駅”字不丢
+        let stationName = place.name.split(" (")[0].trim();
+
+        // 核心修复：确保赋值给 caseStation
+        this.form.caseStation = stationName;
+        this.form.location = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+
+        this.$nextTick(() => {
+          if (inputEl) inputEl.value = stationName;
+        });
+      });
+    },
+    handleToJiRu() {
+      this.dialogVisible = false;
+      this.aiFlag = false;
     },
     toAiMatching() {
       this.$confirm(
@@ -726,7 +910,7 @@ export default {
                   this.total = response.total || 0;
                   (this.aiFlag = true), (this.dialogVisible = true);
                 } else {
-                  // 处理其他错误码（非200的情况）
+                  // 处理其他错误码(非200的情况)
                   this.$modal.msgError(response.msg || "操作失败");
                 }
               })
@@ -788,7 +972,7 @@ export default {
         this.form.employeeList[index].id != null
       ) {
         this.$confirm(
-          "本削除操作は誤操作防止のための処理です。削除後は当該社員の案件履歴は保持されず、出勤状態は「現場出勤」から「待機中」へ変更されます。こちらのデータを削除してもよろしいでしょうか？",
+          "本削除操作は誤操作防止のための処理です。削除後は当該社員の案件履歴は保持されず、出勤状態は「現場出勤」から「待機中」へ変更されます。こちらのデータを削除してもよろしいでしょうか?",
           "確認",
           {
             confirmButtonText: "確定",
@@ -817,11 +1001,12 @@ export default {
         id: null,
         caseId: this.isEditMode ? this.$route.params.caseId : null,
         employeeId: employee.employeeId,
+        staffId:employee.staffId,
         employeeName: employee.employeeName,
       });
       this.dialogVisible = false;
     },
-    // 获取技能显示文字：技能名 + 经验年数
+    // 获取技能显示文字:技能名 + 经验年数
     getSkillLabel(skill) {
       const tech = this.technologyList.find(
         (t) => t.technologyId === skill.technologyId
@@ -890,6 +1075,10 @@ export default {
       this.loading = true;
       getCase(id).then((res) => {
         this.form = res.data;
+        // ✅ 加载数据时,如果有车站信息,标记为已选择
+        if (this.form.caseStation) {
+          this.isStationSelectedFromGoogle = true;
+        }
         this.loading = false;
       });
     },
@@ -939,6 +1128,9 @@ export default {
         if (!valid) return;
         if (!this.validEmployee()) return;
         this.submitLoading = true;
+        if (this.form.caseStation === "") {
+          this.form.location = "";
+        }
         updateCase(this.form).then(() => {
           this.submitLoading = false;
           this.$modal.msgSuccess("更新しました");
@@ -1062,7 +1254,7 @@ export default {
   position: relative;
 }
 
-/* footer 固定在 dialog 右下角，高度 50px */
+/* footer 固定在 dialog 右下角,高度 50px */
 .fixed-height-dialog ::v-deep .el-dialog__footer {
   position: absolute;
   right: 24px;
@@ -1093,5 +1285,97 @@ export default {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
-</style>
+.typing-content {
+  font-family: "Meiryo", "MS Gothic", monospace; /* 使用等宽日文字体 */
+  white-space: pre-wrap; /* 极其重要：保留后端传来的所有换行 */
+  word-break: break-all;
+  line-height: 1.8; /* 增加行高，视觉更舒适 */
+  text-align: justify; /* 两端对齐，解决右侧留白不均问题 */
+  padding: 20px 40px; /* 左右留白增加呼吸感 */
+  background: #fdfdfd;
+}
+.ai-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65); /* 背景变灰/变暗 */
+  backdrop-filter: blur(4px); /* 背景高斯模糊，更显高级 */
+  z-index: 9999; /* 确保在最顶层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.ai-loading-content {
+  text-align: center;
+  color: #409eff;
+}
+
+/* AI 扫描动画容器 */
+.ai-scanner {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #409eff;
+  border-radius: 50%;
+  position: relative;
+  margin: 0 auto 20px;
+  box-shadow: 0 0 20px rgba(64, 158, 255, 0.3);
+  overflow: hidden;
+}
+
+/* 内部核心旋转 */
+.inner-core {
+  width: 40px;
+  height: 40px;
+  background: #409eff;
+  border-radius: 8px;
+  margin: 30px auto;
+  animation: rotateCore 2s infinite linear;
+}
+
+/* 动态扫描线 */
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #fff, transparent);
+  box-shadow: 0 0 8px #fff;
+  animation: scanMove 1.5s infinite ease-in-out;
+}
+
+@keyframes rotateCore {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scanMove {
+  0% {
+    top: 0%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.loading-text {
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-top: 15px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+</style>

@@ -4,14 +4,14 @@
       <el-form-item label="技術名" prop="technologyName">
         <el-input
           v-model="queryParams.technologyName"
-          placeholder="请输入技術名"
+          placeholder="技術名を入力してください"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">検索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">リセット</el-button>
       </el-form-item>
     </el-form>
 
@@ -24,9 +24,9 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['technology:technology:add']"
-        >新增</el-button>
+        >新規</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -36,7 +36,7 @@
           @click="handleUpdate"
           v-hasPermi="['technology:technology:edit']"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -46,9 +46,9 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['technology:technology:remove']"
-        >删除</el-button>
+        >削除</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -57,7 +57,7 @@
           @click="handleExport"
           v-hasPermi="['technology:technology:export']"
         >导出</el-button>
-      </el-col>
+      </el-col> -->
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -73,14 +73,14 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['technology:technology:edit']"
-          >修改</el-button>
+          >変更</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['technology:technology:remove']"
-          >删除</el-button>
+          >削除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -97,12 +97,12 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="技術名" prop="technologyName">
-          <el-input v-model="form.technologyName" placeholder="请输入技術名" />
+          <el-input v-model="form.technologyName" placeholder="技術名を入力してください" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">確認</el-button>
+        <el-button @click="cancel">キャンセル</el-button>
       </div>
     </el-dialog>
   </div>

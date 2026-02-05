@@ -3,6 +3,8 @@ import Vue from 'vue'
 import Cookies from 'js-cookie'
 
 import Element from 'element-ui'
+// --- 【修改点：引入日语语言包】 ---
+import locale from 'element-ui/lib/locale/lang/ja' 
 import './assets/styles/element-variables.scss'
 
 import '@/assets/styles/index.scss' // global css
@@ -64,13 +66,12 @@ DictData.install()
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
  * you can execute: mockXHR()
- *
- * Currently MockJs will be used in the production environment,
- * please remove it before going online! ! !
  */
 
+// --- 【修改点：配置 Element 使用日语】 ---
 Vue.use(Element, {
-  size: Cookies.get('size') || 'medium' // set element-ui default size
+  size: Cookies.get('size') || 'medium', // set element-ui default size
+  locale // 挂载语言包
 })
 
 Vue.config.productionTip = false

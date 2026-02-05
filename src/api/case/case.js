@@ -67,3 +67,11 @@ export function aiMatching(data) {
     data: data
   })
 }
+
+export function resumeParseByAi(data) {
+  return request({
+    url: '/case/case/resumeParseByAi',
+    method: 'post',
+    data: data
+  })
+}

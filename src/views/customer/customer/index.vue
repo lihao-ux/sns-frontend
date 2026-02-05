@@ -10,8 +10,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">検索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">リセット</el-button>
       </el-form-item>
     </el-form>
 
@@ -24,9 +24,9 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['customer:customer:add']"
-        >新增</el-button>
+        >新規</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -36,7 +36,7 @@
           @click="handleUpdate"
           v-hasPermi="['customer:customer:edit']"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -46,9 +46,9 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['customer:customer:remove']"
-        >删除</el-button>
+        >削除</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -57,7 +57,7 @@
           @click="handleExport"
           v-hasPermi="['customer:customer:export']"
         >导出</el-button>
-      </el-col>
+      </el-col> -->
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -86,14 +86,14 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['customer:customer:edit']"
-          >修改</el-button>
+          >変更</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['customer:customer:remove']"
-          >删除</el-button>
+          >削除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -113,7 +113,7 @@
           <el-input v-model="form.customerName" placeholder="请输入お客様名" />
         </el-form-item>
         <el-form-item label="性別" prop="customerGender">
-          <el-select v-model="form.customerGender" placeholder="请选择性別">
+          <el-select v-model="form.customerGender" placeholder="性別を選択してください">
             <el-option
               v-for="dict in dict.type.sys_user_sex"
               :key="dict.value"
@@ -127,22 +127,22 @@
             v-model="form.customerBirthday"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择生年月日">
+            placeholder="生年月日を選択してください">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="年齢" prop="customerAge">
-          <el-input v-model="form.customerAge" placeholder="请输入年齢" />
+          <el-input v-model="form.customerAge" placeholder="年齢を選択してください" />
         </el-form-item>
         <el-form-item label="メールアドレス" prop="customerEmail">
-          <el-input v-model="form.customerEmail" placeholder="请输入メールアドレス" />
+          <el-input v-model="form.customerEmail" placeholder="メールアドレスを入力してください" />
         </el-form-item>
         <el-form-item label="趣味" prop="customerHobbies">
-          <el-input v-model="form.customerHobbies" placeholder="请输入趣味" />
+          <el-input v-model="form.customerHobbies" placeholder="趣味を入力してください" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">確認</el-button>
+        <el-button @click="cancel">キャンセル</el-button>
       </div>
     </el-dialog>
   </div>

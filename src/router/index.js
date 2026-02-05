@@ -65,6 +65,7 @@ export const constantRoutes = [
     path: '',
     component: Layout,
     redirect: 'index',
+    hidden: true, // <--- 添加这一行，它就绝对不会在左侧菜单出现了
     children: [
       {
         path: 'index',
@@ -84,7 +85,7 @@ export const constantRoutes = [
         path: 'profile',
         component: () => import('@/views/system/user/profile/index'),
         name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' }
+        meta: { title: 'マイページ', icon: 'user' }
       }
     ]
   }
@@ -202,6 +203,25 @@ export const dynamicRoutes = [
         component: () => import('@/views/tool/gen/editTable'),
         name: 'GenEdit',
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
+      }
+    ]
+  },
+  {
+    path: '/staffInfo', // 路径必须和你截图里的“路由地址”一致
+    component: Layout,
+    hidden: true,
+    permissions: ['staff'],
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/staffInfo/index'),
+        name: 'StaffInfo', // 建议和截图里的“路由名称”一致
+        meta: {
+          title: '个人情报',
+          icon: 'user',
+          affix: true, // 强制取消叉号
+          noCache: false
+        }
       }
     ]
   }

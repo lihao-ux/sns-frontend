@@ -13,13 +13,13 @@
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/user/profile">
-            <el-dropdown-item>个人中心</el-dropdown-item>
+            <el-dropdown-item>マイページ</el-dropdown-item>
           </router-link>
-          <el-dropdown-item @click.native="setLayout" v-if="setting">
+          <!-- <el-dropdown-item @click.native="setLayout" v-if="setting">
             <span>布局设置</span>
-          </el-dropdown-item>
+          </el-dropdown-item> -->
           <el-dropdown-item divided @click.native="logout">
-            <span>退出登录</span>
+            <span>ログアウト</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -76,9 +76,9 @@ export default {
       this.$emit('setLayout')
     },
     logout() {
-      this.$confirm('确定注销并退出系统吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('ログアウトしてもよろしいですか？', 'ヒント', {
+        confirmButtonText: '確認',
+        cancelButtonText: 'キャンセル',
         type: 'warning'
       }).then(() => {
         this.$store.dispatch('LogOut').then(() => {
