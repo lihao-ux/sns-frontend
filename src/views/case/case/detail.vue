@@ -1001,7 +1001,7 @@ export default {
         id: null,
         caseId: this.isEditMode ? this.$route.params.caseId : null,
         employeeId: employee.employeeId,
-        staffId:employee.staffId,
+        staffId: employee.staffId,
         employeeName: employee.employeeName,
       });
       this.dialogVisible = false;
@@ -1075,10 +1075,20 @@ export default {
       this.loading = true;
       getCase(id).then((res) => {
         this.form = res.data;
-        // ✅ 加载数据时,如果有车站信息,标记为已选择
-        if (this.form.caseStation) {
-          this.isStationSelectedFromGoogle = true;
+
+        if (this.form.customerId && this.form.customerName) {
+          this.customerOptions = [
+            {
+              customerId: this.form.customerId,
+              customerName: this.form.customerName,
+            },
+          ];
         }
+
+        if (this.form.caseStation) {
+          this.isStationSelected = true;
+        }
+
         this.loading = false;
       });
     },
